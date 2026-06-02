@@ -7,5 +7,5 @@ module com.f1legends {
     exports com.f1legends.modelo;
     exports com.f1legends.servicios;
     exports com.f1legends.DAO;
-    exports com.f1legends.DAO.modelo;
+    exports com.f1legends.DAO.modeloDAO;
 }

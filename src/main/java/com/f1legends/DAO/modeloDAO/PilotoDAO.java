@@ -1,4 +1,4 @@
-package com.f1legends.DAO.modelo;
+package com.f1legends.DAO.modeloDAO;
 
 import com.f1legends.DAO.ConexionBD;
 import com.f1legends.modelo.Piloto;

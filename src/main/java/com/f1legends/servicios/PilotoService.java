@@ -1,7 +1,7 @@
 package com.f1legends.servicios;
 
 import com.f1legends.modelo.Piloto;
-import com.f1legends.DAO.modelo.PilotoDAO;
+import com.f1legends.DAO.modeloDAO.PilotoDAO;
 
 public class PilotoService {
     private PilotoDAO dao = new PilotoDAO();

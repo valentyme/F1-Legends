@@ -1,7 +1,7 @@
 package com.f1legends;
 
 import com.f1legends.DAO.ConexionBD;
-import com.f1legends.DAO.modelo.PilotoDAO;
+import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.modelo.Piloto;
 
 public class Test {
