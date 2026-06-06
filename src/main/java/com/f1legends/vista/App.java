@@ -1,4 +1,4 @@
-package com.f1legends.ui;
+package com.f1legends.vista;
 
 import com.f1legends.modelo.Auto;
 import com.f1legends.modelo.CircuitoMonza;
