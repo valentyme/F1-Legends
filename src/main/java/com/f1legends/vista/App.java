@@ -2,6 +2,7 @@ package com.f1legends.vista;
 
 import com.f1legends.modelo.Auto;
 import com.f1legends.modelo.CircuitoMonza;
+import com.f1legends.modelo.Escuderia;
 import com.f1legends.servicios.CarreraService;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -17,17 +18,25 @@ import java.util.Arrays;
 public class App extends Application {
     private static final int ANCHO = 950;
     private static final int ALTO = 650;
+
     @Override
     public void start(Stage stage) {
         Canvas canvas = new Canvas(ANCHO, ALTO);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        // Autos con colores oficiales
-        Auto ferrari   = new Auto("Ferrari",   0.055, Color.RED);
-        Auto mercedes  = new Auto("Mercedes",  0.051, Color.SILVER);   // plateado
-        Auto redbull   = new Auto("Red Bull",  0.058, Color.DARKBLUE);
-        Auto mclaren   = new Auto("McLaren",   0.052, Color.ORANGE);
-        Auto alpine    = new Auto("Alpine",    0.050, Color.DEEPSKYBLUE);
+        // Escuderías con colores oficiales
+        Escuderia ferrariEsc = new Escuderia(1, "Ferrari", Color.RED);
+        Escuderia mercedesEsc = new Escuderia(2, "Mercedes", Color.SILVER);
+        Escuderia redbullEsc = new Escuderia(3, "Red Bull", Color.DARKBLUE);
+        Escuderia mclarenEsc = new Escuderia(4, "McLaren", Color.ORANGE);
+        Escuderia alpineEsc = new Escuderia(5, "Alpine", Color.DEEPSKYBLUE);
+
+        // Autos vinculados a sus escuderías
+        Auto ferrari   = new Auto(1, "SF-24", 0.055, ferrariEsc);
+        Auto mercedes  = new Auto(2, "W15",   0.051, mercedesEsc);
+        Auto redbull   = new Auto(3, "RB20",  0.058, redbullEsc);
+        Auto mclaren   = new Auto(4, "MCL60", 0.052, mclarenEsc);
+        Auto alpine    = new Auto(5, "A524",  0.050, alpineEsc);
 
         CarreraService carrera = new CarreraService(
                 new CircuitoMonza(),
@@ -55,10 +64,10 @@ public class App extends Application {
                 // Dibujar circuito
                 carrera.getCircuito().dibujar(gc);
 
-                // Dibujar autos con su color
+                // Dibujar autos con el color de su escudería
                 for (Auto auto : carrera.getAutos()) {
                     var pos = carrera.getCircuito().calcularPosicion(auto.getProgreso());
-                    gc.setFill(auto.getColor());
+                    gc.setFill(auto.getEscuderia().getColor());
                     gc.fillOval(pos.x - 9, pos.y - 9, 18, 18);
                     gc.setStroke(Color.WHITE);
                     gc.setLineWidth(1.5);
@@ -72,5 +81,4 @@ public class App extends Application {
         stage.setTitle("F1 Legends - Monza");
         stage.show();
     }
-
 }

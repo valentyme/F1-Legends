@@ -6,7 +6,7 @@ import javafx.scene.paint.Color;
 public class CircuitoMonza extends Circuito {
 
     public CircuitoMonza() {
-        super("Monza");
+        super(1, "Monza", "Italia", 53); // id, nombre, país, vueltas
     }
 
     @Override
