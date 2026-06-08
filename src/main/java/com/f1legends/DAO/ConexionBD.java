@@ -28,9 +28,7 @@ public class ConexionBD {
 
     public static Connection conectar() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
-        if (!inicializada) {
-            inicializarBaseSiEsNecesario(conn);
-        }
+        inicializarBaseSiEsNecesario(conn);
         return conn;
     }
 
@@ -95,10 +93,10 @@ public class ConexionBD {
         try {
             String script = Files.readString(datasetPath, StandardCharsets.UTF_8);
             try (Statement stmt = conn.createStatement()) {
-                for (String sql : dividirSentenciasSql(script)) {
-                    String sentencia = sql.trim();
-                    if (!sentencia.isEmpty()) {
-                        stmt.executeUpdate(sentencia);
+                for (String sql : splitSqlStatements(script)) {
+                    String statement = sql.trim();
+                    if (!statement.isEmpty()) {
+                        stmt.executeUpdate(statement);
                     }
                 }
             }
@@ -107,27 +105,66 @@ public class ConexionBD {
         }
     }
 
-    private static List<String> dividirSentenciasSql(String script) {
-        List<String> sentencias = new ArrayList<>();
-        StringBuilder actual = new StringBuilder();
-        boolean enComillaSimple = false;
+    private static List<String> splitSqlStatements(String script) {
+        List<String> statements = new ArrayList<>();
+        StringBuilder currentStatement = new StringBuilder();
+        boolean inSingleQuote = false;
+        boolean inLineComment = false;
+        boolean inBlockComment = false;
 
-        for (char c : script.toCharArray()) {
-            if (c == '\'') {
-                enComillaSimple = !enComillaSimple;
+        for (int i = 0; i < script.length(); i++) {
+            char currentChar = script.charAt(i);
+            char nextChar = (i + 1 < script.length()) ? script.charAt(i + 1) : '\0';
+
+            if (inLineComment) {
+                if (currentChar == '\n') {
+                    inLineComment = false;
+                    currentStatement.append(currentChar);
+                }
+                continue;
             }
 
-            if (c == ';' && !enComillaSimple) {
-                sentencias.add(actual.toString());
-                actual.setLength(0);
+            if (inBlockComment) {
+                if (currentChar == '*' && nextChar == '/') {
+                    inBlockComment = false;
+                    i++;
+                }
+                continue;
+            }
+
+            if (!inSingleQuote && currentChar == '-' && nextChar == '-') {
+                inLineComment = true;
+                i++;
+                continue;
+            }
+
+            if (!inSingleQuote && currentChar == '/' && nextChar == '*') {
+                inBlockComment = true;
+                i++;
+                continue;
+            }
+
+            if (currentChar == '\'' && inSingleQuote && nextChar == '\'') {
+                currentStatement.append(currentChar).append(nextChar);
+                i++;
+                continue;
+            }
+
+            if (currentChar == '\'') {
+                inSingleQuote = !inSingleQuote;
+            }
+
+            if (currentChar == ';' && !inSingleQuote) {
+                statements.add(currentStatement.toString());
+                currentStatement.setLength(0);
             } else {
-                actual.append(c);
+                currentStatement.append(currentChar);
             }
         }
 
-        if (!actual.isEmpty()) {
-            sentencias.add(actual.toString());
+        if (!currentStatement.isEmpty()) {
+            statements.add(currentStatement.toString());
         }
-        return sentencias;
+        return statements;
     }
 }
