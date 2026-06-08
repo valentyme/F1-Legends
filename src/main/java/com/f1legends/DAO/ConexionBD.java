@@ -17,6 +17,12 @@ public class ConexionBD {
     }
 
     public static Connection conectar() throws SQLException {
-        return DriverManager.getConnection(URL);
+    Connection conn = DriverManager.getConnection(URL);
+    try {
+        inicializarBaseSiEsNecesario(conn); // create schema + seed if empty
+        return conn;
+    } catch (SQLException e) {
+        conn.close();
+        throw e;
     }
 }
