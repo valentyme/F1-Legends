@@ -28,8 +28,16 @@ public class ConexionBD {
 
     public static Connection conectar() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
-        inicializarBaseSiEsNecesario(conn);
-        return conn;
+        try {
+            inicializarBaseSiEsNecesario(conn);
+            return conn;
+        } catch (SQLException e) {
+            try {
+                conn.close();
+            } catch (SQLException ignored) {
+            }
+            throw e;
+        }
     }
 
     private static void inicializarBaseSiEsNecesario(Connection conn) throws SQLException {
