@@ -9,10 +9,13 @@ import java.sql.Statement;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConexionBD {
     private static final String DB_PATH = "BaseDeDatos/f1_legends.db";
     private static final String URL = "jdbc:sqlite:" + DB_PATH;
+    private static volatile boolean inicializada = false;
 
     static {
         try {
@@ -25,19 +28,33 @@ public class ConexionBD {
 
     public static Connection conectar() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
-        inicializarBaseSiEsNecesario(conn);
+        if (!inicializada) {
+            inicializarBaseSiEsNecesario(conn);
+        }
         return conn;
     }
 
-    private static synchronized void inicializarBaseSiEsNecesario(Connection conn) throws SQLException {
-        crearTablasSiNoExisten(conn);
+    private static void inicializarBaseSiEsNecesario(Connection conn) throws SQLException {
+        if (inicializada) {
+            return;
+        }
 
-        String verificarDatos = "SELECT COUNT(*) FROM Pilotos";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(verificarDatos)) {
-            if (rs.next() && rs.getInt(1) == 0) {
-                cargarDataset(conn);
+        synchronized (ConexionBD.class) {
+            if (inicializada) {
+                return;
             }
+
+            crearTablasSiNoExisten(conn);
+
+            String verificarDatos = "SELECT COUNT(*) FROM Pilotos";
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(verificarDatos)) {
+                if (rs.next() && rs.getInt(1) == 0) {
+                    cargarDataset(conn);
+                }
+            }
+
+            inicializada = true;
         }
     }
 
@@ -78,7 +95,7 @@ public class ConexionBD {
         try {
             String script = Files.readString(datasetPath, StandardCharsets.UTF_8);
             try (Statement stmt = conn.createStatement()) {
-                for (String sql : script.split(";")) {
+                for (String sql : dividirSentenciasSql(script)) {
                     String sentencia = sql.trim();
                     if (!sentencia.isEmpty()) {
                         stmt.executeUpdate(sentencia);
@@ -86,7 +103,31 @@ public class ConexionBD {
                 }
             }
         } catch (IOException e) {
-            throw new SQLException("No se pudo cargar el dataset inicial", e);
+            throw new SQLException("No se pudo cargar el dataset inicial desde " + datasetPath, e);
         }
+    }
+
+    private static List<String> dividirSentenciasSql(String script) {
+        List<String> sentencias = new ArrayList<>();
+        StringBuilder actual = new StringBuilder();
+        boolean enComillaSimple = false;
+
+        for (char c : script.toCharArray()) {
+            if (c == '\'') {
+                enComillaSimple = !enComillaSimple;
+            }
+
+            if (c == ';' && !enComillaSimple) {
+                sentencias.add(actual.toString());
+                actual.setLength(0);
+            } else {
+                actual.append(c);
+            }
+        }
+
+        if (!actual.isEmpty()) {
+            sentencias.add(actual.toString());
+        }
+        return sentencias;
     }
 }
