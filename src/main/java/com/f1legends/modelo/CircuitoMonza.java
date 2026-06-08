@@ -5,8 +5,12 @@ import javafx.scene.paint.Color;
 
 public class CircuitoMonza extends Circuito {
 
+    public CircuitoMonza(int id, String nombre, String pais, int vueltas) {
+        super(id, nombre, pais, vueltas);
+    }
+    // Constructor vacío para inicialización rápida
     public CircuitoMonza() {
-        super(1, "Monza", "Italia", 53); // id, nombre, país, vueltas
+        super(1, "Monza", "Italia", 53);
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.f1legends.DAO.ConexionBD;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.modelo.Piloto;
 
-public class Test {
+public class tesst {
     public static void main(String[] args) {
         try {
             // 1. Probar conexión
