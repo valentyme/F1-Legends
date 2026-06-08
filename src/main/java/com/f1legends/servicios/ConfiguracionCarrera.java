@@ -14,6 +14,20 @@ public class ConfiguracionCarrera {
     private int vueltas;
     private String climaInicial;
 
+    // Constructor vacío
+    public ConfiguracionCarrera() {}
+
+    // Constructor completo (útil para tests o inicialización rápida)
+    public ConfiguracionCarrera(String modoJuego, Piloto pilotoSeleccionado,
+                                List<Jugador> participantes, Circuito circuito,
+                                int vueltas, String climaInicial) {
+        this.modoJuego = modoJuego;
+        this.pilotoSeleccionado = pilotoSeleccionado;
+        this.participantes = participantes;
+        this.circuito = circuito;
+        this.vueltas = vueltas;
+        this.climaInicial = climaInicial;
+    }
     // Getters y Setters
     public String getModoJuego() {
         return modoJuego;

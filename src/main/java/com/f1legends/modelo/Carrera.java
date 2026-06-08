@@ -17,7 +17,17 @@ public class Carrera {
         this.climaInicial = climaInicial;
     }
 
+    // Constructor que recibe la configuración
     public Carrera(ConfiguracionCarrera configuracionCarrera) {
-
+        this.circuito = configuracionCarrera.getCircuito();
+        this.vueltas = configuracionCarrera.getVueltas();
+        this.climaInicial = configuracionCarrera.getClimaInicial();
     }
+
+    // Getters
+    public int getId() { return id; }
+    public Circuito getCircuito() { return circuito; }
+    public String getFecha() { return fecha; }
+    public int getVueltas() { return vueltas; }
+    public String getClimaInicial() { return climaInicial; }
 }

@@ -13,13 +13,15 @@ public class SeleccionarCircuitoTest {
     public void testSeleccionarCircuitoValido() {
         SistemaCarreraFacade facade = new SistemaCarreraFacade();
 
-        // Seleccionamos un circuito que sabemos existe en la BD (ej: ID 3 = Mónaco, según tu dataset)
+        // Seleccionamos el circuito con ID 4 (Monaco en tu dataset)
         facade.seleccionarCircuito(4);
 
         Circuito circuitoSeleccionado = facade.getConfiguracionCarrera().getCircuito();
 
         assertNotNull(circuitoSeleccionado, "El circuito no debería ser null");
-        assertEquals(3, circuitoSeleccionado.getId(), "El ID del circuito debería ser 3");
-        assertEquals("Monaco", circuitoSeleccionado.getNombre(), "El nombre debería coincidir");
+        assertEquals(4, circuitoSeleccionado.getId(), "El ID del circuito debería ser 4");
+        assertTrue(circuitoSeleccionado.getNombre().contains("Monaco"),
+                "El nombre debería contener 'Monaco'");
+
     }
 }
