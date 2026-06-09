@@ -17,12 +17,17 @@ public class ConexionBD {
     }
 
     public static Connection conectar() throws SQLException {
-    Connection conn = DriverManager.getConnection(URL);
-    try {
-        inicializarBaseSiEsNecesario(conn); // create schema + seed if empty
-        return conn;
-    } catch (SQLException e) {
-        conn.close();
-        throw e;
+        Connection conn = DriverManager.getConnection(URL);
+        try {
+            inicializarBaseSiEsNecesario(conn);
+            return conn;
+        } catch (SQLException e) {
+            conn.close();
+            throw e;
+        }
+    }
+
+    private static void inicializarBaseSiEsNecesario(Connection conn) throws SQLException {
+        // Pendiente para la parte de persistencia.
     }
 }

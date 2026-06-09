@@ -1,15 +1,12 @@
 package com.f1legends.modelo;
 
-import javafx.scene.paint.Color;
-
 public class Auto {
-    private int id;                // PK en la BD
-    private String modelo;         // modelo del auto
-    private double velocidadBase;  // velocidad_base en la BD
-    private Escuderia escuderia;   // relación con Escuderia (FK)
-
-    // Atributo adicional para simulación
+    private int id;
+    private String modelo;
+    private double velocidadBase;
+    private Escuderia escuderia;
     private double progreso;
+    private int vueltasCompletadas;
 
     public Auto(int id, String modelo, double velocidadBase, Escuderia escuderia) {
         this.id = id;
@@ -17,22 +14,24 @@ public class Auto {
         this.velocidadBase = velocidadBase;
         this.escuderia = escuderia;
         this.progreso = 0.0;
+        this.vueltasCompletadas = 0;
     }
 
-    // Método de simulación
     public void avanzar(double deltaTiempo) {
         progreso += velocidadBase * deltaTiempo;
-        if (progreso > 1.0) progreso -= 1.0;
+        while (progreso >= 1.0) {
+            progreso -= 1.0;
+            vueltasCompletadas++;
+        }
     }
 
-    // Getters
     public int getId() { return id; }
     public String getModelo() { return modelo; }
     public double getVelocidadBase() { return velocidadBase; }
     public Escuderia getEscuderia() { return escuderia; }
     public double getProgreso() { return progreso; }
+    public int getVueltasCompletadas() { return vueltasCompletadas; }
 
-    // Setters opcionales
     public void setModelo(String modelo) { this.modelo = modelo; }
     public void setVelocidadBase(double velocidadBase) { this.velocidadBase = velocidadBase; }
     public void setEscuderia(Escuderia escuderia) { this.escuderia = escuderia; }
