@@ -6,7 +6,6 @@ import java.sql.SQLException;
 
 public class ConexionBD {
     private static final String URL = "jdbc:sqlite:BaseDeDatos/f1_legends.db"; // tu archivo .db
-
     static {
         try {
             // Registrar el driver explícitamente
@@ -17,12 +16,6 @@ public class ConexionBD {
     }
 
     public static Connection conectar() throws SQLException {
-    Connection conn = DriverManager.getConnection(URL);
-    try {
-        inicializarBaseSiEsNecesario(conn); // create schema + seed if empty
-        return conn;
-    } catch (SQLException e) {
-        conn.close();
-        throw e;
+        return DriverManager.getConnection(URL);
     }
 }
