@@ -1,9 +1,9 @@
 package com.f1legends.patrones.factory;
 
-import com.f1legends.modelo.Auto;
-import com.f1legends.modelo.AutoFerrari;
-import com.f1legends.modelo.AutoMercedes;
-import com.f1legends.modelo.AutoRedBull;
+import com.f1legends.modelo.auto.Auto;
+import com.f1legends.modelo.auto.AutoFerrari;
+import com.f1legends.modelo.auto.AutoMercedes;
+import com.f1legends.modelo.auto.AutoRedBull;
 
 public class FabricaAuto {
     public Auto crearAuto(TipoAuto tipoAuto) {

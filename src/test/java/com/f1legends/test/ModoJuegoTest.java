@@ -1,7 +1,7 @@
 package com.f1legends.test;
 
 
-import com.f1legends.patrones.SistemaCarreraFacade;
+import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

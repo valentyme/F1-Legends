@@ -1,4 +1,4 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.Usuarios;
 
 public class Jugador extends Usuario {
     private String fechaRegistro;

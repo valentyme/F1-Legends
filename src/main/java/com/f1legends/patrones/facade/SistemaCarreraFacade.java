@@ -1,10 +1,10 @@
-package com.f1legends.patrones;
+package com.f1legends.patrones.facade;
 
 import com.f1legends.modelo.*;
+import com.f1legends.modelo.Escuderias.Escuderia;
+import com.f1legends.modelo.carreras.Carrera;
+import com.f1legends.modelo.circuitos.Circuito;
 import com.f1legends.servicios.*;
-
-
-import java.util.List;
 
 public class SistemaCarreraFacade {
 

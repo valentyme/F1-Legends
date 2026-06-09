@@ -1,7 +1,7 @@
 package com.f1legends.servicios;
 
-import com.f1legends.modelo.Auto;
-import com.f1legends.modelo.Circuito;
+import com.f1legends.modelo.auto.Auto;
+import com.f1legends.modelo.circuitos.Circuito;
 
 import java.util.List;
 

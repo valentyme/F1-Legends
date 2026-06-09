@@ -1,4 +1,4 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.Usuarios;
 
 public class Administrador extends Usuario {
     public Administrador(int id, String username, String password) {

@@ -1,4 +1,4 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.Escuderias;
 
 import javafx.scene.paint.Color;
 

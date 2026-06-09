@@ -1,4 +1,6 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.auto;
+
+import com.f1legends.modelo.Escuderias.Escuderia;
 
 public class Auto {
     private int id;

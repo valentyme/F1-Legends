@@ -1,10 +1,8 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.circuitos;
 
+import com.f1legends.modelo.Punto;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;

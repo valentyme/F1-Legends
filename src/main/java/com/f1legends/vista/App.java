@@ -1,9 +1,9 @@
 package com.f1legends.vista;
 
-import com.f1legends.modelo.Auto;
-import com.f1legends.modelo.Carrera;
-import com.f1legends.modelo.CircuitoMonza;
-import com.f1legends.modelo.Escuderia;
+import com.f1legends.modelo.auto.Auto;
+import com.f1legends.modelo.carreras.Carrera;
+import com.f1legends.modelo.circuitos.CircuitoMonza;
+import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.patrones.factory.FabricaAuto;
 import com.f1legends.patrones.factory.TipoAuto;
 import javafx.animation.AnimationTimer;

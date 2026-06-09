@@ -1,5 +1,6 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.circuitos;
 
+import com.f1legends.modelo.Punto;
 import javafx.scene.canvas.GraphicsContext;
 
 public class CircuitoSilverstone extends Circuito {

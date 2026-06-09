@@ -2,8 +2,8 @@ package com.f1legends.servicios;
 
 import com.f1legends.DAO.modeloDAO.CircuitoDAO;
 import com.f1legends.DAO.modeloDAO.CircuitoDTO;
-import com.f1legends.patrones.CircuitoFactory;
-import com.f1legends.modelo.Circuito;
+import com.f1legends.patrones.circuitoFactory.CircuitoFactory;
+import com.f1legends.modelo.circuitos.Circuito;
 import java.util.List;
 import java.util.stream.Collectors;
 

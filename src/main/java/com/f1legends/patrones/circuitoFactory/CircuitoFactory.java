@@ -1,7 +1,10 @@
-package com.f1legends.patrones;
+package com.f1legends.patrones.circuitoFactory;
 
 import com.f1legends.DAO.modeloDAO.CircuitoDTO;
-import com.f1legends.modelo.*;
+import com.f1legends.modelo.circuitos.Circuito;
+import com.f1legends.modelo.circuitos.CircuitoGenerico;
+import com.f1legends.modelo.circuitos.CircuitoMonza;
+import com.f1legends.modelo.circuitos.CircuitoSilverstone;
 
 public class CircuitoFactory {
     public static Circuito crear(CircuitoDTO dto) {

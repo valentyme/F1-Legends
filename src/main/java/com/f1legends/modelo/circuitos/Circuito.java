@@ -1,4 +1,6 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.circuitos;
+
+import com.f1legends.modelo.Punto;
 
 public abstract class Circuito {
     private int id;          // PK en la BD

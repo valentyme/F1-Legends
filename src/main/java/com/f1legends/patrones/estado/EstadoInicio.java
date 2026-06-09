@@ -1,6 +1,6 @@
 package com.f1legends.patrones.estado;
 
-import com.f1legends.modelo.Carrera;
+import com.f1legends.modelo.carreras.Carrera;
 
 public class EstadoInicio implements EstadoCarrera {
     @Override
