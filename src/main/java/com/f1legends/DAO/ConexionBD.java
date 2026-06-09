@@ -5,29 +5,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionBD {
-    private static final String URL = "jdbc:sqlite:BaseDeDatos/f1_legends.db"; // tu archivo .db
+    private static final String URL = "jdbc:sqlite:BaseDeDatos/f1_legends.db";
 
     static {
         try {
-            // Registrar el driver explícitamente
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("No se encontró el driver SQLite", e);
+            throw new RuntimeException("No se encontro el driver SQLite", e);
         }
     }
 
     public static Connection conectar() throws SQLException {
-        Connection conn = DriverManager.getConnection(URL);
-        try {
-            inicializarBaseSiEsNecesario(conn);
-            return conn;
-        } catch (SQLException e) {
-            conn.close();
-            throw e;
-        }
-    }
-
-    private static void inicializarBaseSiEsNecesario(Connection conn) throws SQLException {
-        // Pendiente para la parte de persistencia.
+        return DriverManager.getConnection(URL);
     }
 }
