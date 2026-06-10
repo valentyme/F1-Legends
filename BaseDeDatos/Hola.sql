@@ -52,3 +52,5 @@ INSERT INTO Circuitos (nombre, pais, vueltas) VALUES
                                                   ('Circuit of the Americas', 'EE.UU.', 56),
                                                   ('Yas Marina', 'Emiratos Árabes Unidos', 58),
                                                   ('Bahrain International Circuit', 'Baréin', 57);
+
+INSERT INTO Usuarios (username, password, rol, fecha_registro) VALUES ('Martin','1234','Jugador', '12')
