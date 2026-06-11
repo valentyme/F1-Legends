@@ -14,6 +14,8 @@ import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.carreras.Ranking;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.patrones.circuitoFactory.CircuitoFactory;
+import com.f1legends.patrones.fabricaEscuderia.FabricaEscuderia;
+import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.factory.FabricaAuto;
 import com.f1legends.patrones.factory.TipoAuto;
 import com.f1legends.modelo.circuitos.Circuito;
@@ -282,8 +284,38 @@ public class Main {
     // ════════════════════════════════════════════════
     // FLUJO DE JUEGO — Jugador
     // ════════════════════════════════════════════════
+    private static String seleccionarModoJuego(SistemaCarreraFacade facade) {
+        subtitulo("CU08 — SELECCIONAR MODO DE JUEGO");
+        System.out.println("  [1] Singleplayer");
+        System.out.println("  [2] Multijugador Local");
+        System.out.print("  Opción: ");
+        String op = sc.nextLine().trim();
+
+        switch (op) {
+            case "1" -> {
+                facade.seleccionarModoJuego("Singleplayer");
+                msgOk("Modo seleccionado: Singleplayer");
+                return "Singleplayer";
+            }
+            case "2" -> {
+                facade.seleccionarModoJuego("Multijugador Local");
+                msgOk("Modo seleccionado: Multijugador Local");
+                return "Multijugador Local";
+            }
+            default -> {
+                msgError("Opción inválida.");
+                return null;
+            }
+        }
+    }
+
     private static void flujoJugarCarrera(Jugador jugador) {
+        SistemaCarreraFacade facade = new SistemaCarreraFacade();
+
         subtitulo("PREPARANDO CARRERA");
+
+        String modo = seleccionarModoJuego(facade);
+        if (modo == null) return;
 
         // CU09 — Seleccionar piloto
         List<Piloto> pilotos = PilotoDAO.obtenerTodos();
@@ -298,8 +330,8 @@ public class Main {
         try { pilotoId = Integer.parseInt(sc.nextLine().trim()); }
         catch (NumberFormatException e) { msgError("ID inválido."); return; }
 
-        Piloto pilotoElegido = PilotoDAO.obtenerPorId(pilotoId);
-        if (pilotoElegido == null) { msgError("Piloto no encontrado."); return; }
+        facade.seleccionarPiloto(pilotoId); // ahora lo maneja el Facade
+        Piloto pilotoElegido = facade.getConfiguracionCarrera().getPilotoSeleccionado();
         msgOk("Piloto seleccionado: " + pilotoElegido.getNombre());
 
         // CU11 — Seleccionar circuito
@@ -316,17 +348,16 @@ public class Main {
         try { circuitoId = Integer.parseInt(sc.nextLine().trim()); }
         catch (NumberFormatException e) { msgError("ID inválido."); return; }
 
-        CircuitoDTO circuitoDTO = circuitoDAO.obtenerPorId(circuitoId);
-        if (circuitoDTO == null) { msgError("Circuito no encontrado."); return; }
-        Circuito circuito = CircuitoFactory.crear(circuitoDTO);
-        msgOk("Circuito: " + circuitoDTO.getNombre() + " — " + circuitoDTO.getPais());
+        facade.seleccionarCircuito(circuitoId); // Facade se encarga
+        Circuito circuito = facade.getConfiguracionCarrera().getCircuito();
+        msgOk("Circuito: " + circuito.getNombre() + " — " + circuito.getPais());
 
         // CU12 — Configurar vueltas y clima
-        System.out.print("\n  Número de vueltas [1-" + circuitoDTO.getVueltas() + "]: ");
+        System.out.print("\n  Número de vueltas [1-" + circuitoDAO.obtenerPorId(circuitoId).getVueltas() + "]: ");
         int vueltas;
         try { vueltas = Integer.parseInt(sc.nextLine().trim()); }
         catch (NumberFormatException e) { vueltas = 3; }
-        vueltas = Math.max(1, Math.min(vueltas, circuitoDTO.getVueltas()));
+        vueltas = Math.max(1, Math.min(vueltas, circuitoDAO.obtenerPorId(circuitoId).getVueltas()));
 
         System.out.println("  Clima: [1] Soleado  [2] Lluvioso  [3] Nublado");
         System.out.print("  Opción: ");
@@ -336,9 +367,15 @@ public class Main {
             default  -> "Soleado";
         };
 
-        // Armar la carrera con los autos del dataset
-        simularCarrera(jugador, pilotoElegido, circuito, circuitoDTO.getNombre(), vueltas, clima);
+        facade.configurarCarrera(vueltas, clima);
+
+        // Iniciar carrera desde el Facade
+        Carrera carrera = facade.iniciarCarrera();
+
+        // Pasar la carrera ya configurada a la simulación
+        simularCarrera(jugador, pilotoElegido, circuito, circuito.getNombre(), vueltas, clima);
     }
+
 
     /**
      * Simula la carrera en consola usando la lógica real de Carrera + Auto.
@@ -351,13 +388,28 @@ public class Main {
         System.out.println("  *** CARRERA EN " + nombreCircuito.toUpperCase() + " — " + vueltas + " VUELTAS — " + clima.toUpperCase() + " ***");
         linea();
 
-        // Autos rivales hardcodeados igual que en App.java
         FabricaAuto fabricaAuto = new FabricaAuto();
+        FabricaEscuderia fabricaEscuderia = new FabricaEscuderia();
+
+// Escuderías desde la BD
+        Escuderia ferrariEsc  = fabricaEscuderia.crearEscuderia(1); // Ferrari
+        Escuderia mercedesEsc = fabricaEscuderia.crearEscuderia(2); // Mercedes
+        Escuderia redbullEsc  = fabricaEscuderia.crearEscuderia(3); // Red Bull
+        Escuderia mclarenEsc  = fabricaEscuderia.crearEscuderia(4); // McLaren
+        Escuderia alpineEsc   = fabricaEscuderia.crearEscuderia(5); // Alpine
+
+// Autos asociados a cada escudería
         Auto ferrari  = fabricaAuto.crearAuto(TipoAuto.FERRARI);
+        ferrari.setEscuderia(ferrariEsc);
+
         Auto mercedes = fabricaAuto.crearAuto(TipoAuto.MERCEDES);
+        mercedes.setEscuderia(mercedesEsc);
+
         Auto redbull  = fabricaAuto.crearAuto(TipoAuto.RED_BULL);
-        Escuderia mclarenEsc = new Escuderia(4, "McLaren", Color.ORANGE);
+        redbull.setEscuderia(redbullEsc);
+
         Auto mclaren  = new Auto(4, "MCL60", 0.052, mclarenEsc);
+        Auto alpine   = new Auto(5, "A524", 0.050, alpineEsc);
 
         // Auto del jugador basado en la habilidad del piloto elegido
         double velJugador = 0.046 + (pilotoElegido.getHabilidad() / 100.0) * 0.014;

@@ -54,3 +54,15 @@ INSERT INTO Circuitos (nombre, pais, vueltas) VALUES
                                                   ('Bahrain International Circuit', 'Baréin', 57);
 
 INSERT INTO Usuarios (username, password, rol, fecha_registro) VALUES ('Martin','1234','Jugador', '12')
+
+create table RankingGlobal
+(
+    id               INTEGER
+        primary key autoincrement,
+    usuario_id      INTEGER not null
+        references Usuarios,
+    puntaje INTEGER not null
+);
+
+
+select * from Usuarios;
