@@ -4,6 +4,7 @@ import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.circuitos.CircuitoMonza;
 import com.f1legends.modelo.Escuderias.Escuderia;
+import com.f1legends.modelo.circuitos.CircuitoSpa;
 import com.f1legends.patrones.factory.FabricaAuto;
 import com.f1legends.patrones.factory.TipoAuto;
 import javafx.animation.AnimationTimer;
@@ -38,7 +39,7 @@ public class App extends Application {
         Auto mclaren = new Auto(4, "MCL60", 0.052, mclarenEsc);
         Auto alpine = new Auto(5, "A524", 0.050, alpineEsc);
 
-        Carrera carrera = new Carrera(1, new CircuitoMonza(), "08/06/2026", 3, "Soleado");
+        Carrera carrera = new Carrera(1, new CircuitoSpa(), "08/06/2026", 3, "Soleado");
         carrera.agregarAuto(ferrari);
         carrera.agregarAuto(mercedes);
         carrera.agregarAuto(redbull);
