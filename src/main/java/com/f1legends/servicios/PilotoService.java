@@ -19,13 +19,15 @@ public class PilotoService {
         return dao.obtenerPorId(id);
     }
     // Seleccionar piloto por ID
+
     public Piloto seleccionarPiloto(int id) {
-        Piloto piloto = PilotoDAO.obtenerPorId(id);
+        Piloto piloto = dao.obtenerPorId(id); // ✅ uso del DAO instanciado
         if (piloto == null) {
             throw new IllegalArgumentException("Piloto no encontrado con ID: " + id);
         }
         return piloto;
     }
+
     // Listar todos los pilotos
     public List<Piloto> listarPilotos() {
         return PilotoDAO.obtenerTodos();

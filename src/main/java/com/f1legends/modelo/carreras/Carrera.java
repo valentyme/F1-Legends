@@ -18,6 +18,7 @@ public class Carrera {
     private String climaInicial;
     private List<Auto> autos;
     private EstadoCarrera estadoActual;
+    private String modoJuego;
 
     public Carrera(int id, Circuito circuito, String fecha, int vueltas, String climaInicial) {
         this.id = id;
@@ -33,9 +34,14 @@ public class Carrera {
         this.circuito = configuracionCarrera.getCircuito();
         this.vueltas = configuracionCarrera.getVueltas();
         this.climaInicial = configuracionCarrera.getClimaInicial();
+        this.modoJuego = configuracionCarrera.getModoJuego(); // debe compilar si el getter existe
+        this.fecha = java.time.LocalDate.now().toString();
         this.autos = new ArrayList<>();
         this.estadoActual = new EstadoInicio();
     }
+
+
+
 
     public void iniciar() {
         estadoActual.iniciar(this);
@@ -92,4 +98,6 @@ public class Carrera {
     public List<Auto> getAutos() { return autos; }
     public EstadoCarrera getEstadoActual() { return estadoActual; }
     public String getNombreEstado() { return estadoActual.getNombre(); }
+    public String getModoJuego() { return modoJuego; }
+
 }

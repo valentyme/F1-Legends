@@ -2,79 +2,94 @@ package com.f1legends.patrones.facade;
 
 import com.f1legends.modelo.*;
 import com.f1legends.modelo.Escuderias.Escuderia;
+import com.f1legends.modelo.Usuarios.Jugador;
+import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.circuitos.Circuito;
 import com.f1legends.servicios.*;
 
+import java.util.List;
+
 public class SistemaCarreraFacade {
 
     private ConfiguracionCarrera configuracionCarrera;
-    private PilotoService pilotoService;
-    private EscuderiaService escuderiaService;
-    private CircuitoService circuitoService;
-    private ModoJuegoService modoJuegoService;
+    private PilotoService        pilotoService;
+    private EscuderiaService     escuderiaService;
+    private CircuitoService      circuitoService;
+    private ModoJuegoService     modoJuegoService;
 
     public SistemaCarreraFacade() {
-        this.pilotoService = new PilotoService();
-        this.escuderiaService = new EscuderiaService();
-        this.circuitoService = new CircuitoService();
-        this.modoJuegoService = new ModoJuegoService();
+        this.pilotoService       = new PilotoService();
+        this.escuderiaService    = new EscuderiaService();
+        this.circuitoService     = new CircuitoService();
+        this.modoJuegoService    = new ModoJuegoService();
         this.configuracionCarrera = new ConfiguracionCarrera();
     }
 
-    // CU08 - Seleccionar modo de juego
-    public void seleccionarModoJuego(String modo) {
-        modoJuegoService.seleccionarModo(modo);
-        configuracionCarrera.setModoJuego(modoJuegoService.getModoSeleccionado());
-    }
     public ConfiguracionCarrera getConfiguracionCarrera() {
         return configuracionCarrera;
     }
 
-    // CU09 - Seleccionar piloto
+    // ── CU08 ─────────────────────────────────────────
+    public void seleccionarModoJuego(String modo) {
+        modoJuegoService.seleccionarModo(modo);
+        configuracionCarrera.setModoJuego(modoJuegoService.getModoSeleccionado());
+    }
+
+    // ── CU09 ─────────────────────────────────────────
+    /**
+     * Busca el piloto, lo guarda en la configuración y — sólo si el
+     * jugadorPrincipal ya fue registrado — crea el Participante principal.
+     * De esta forma nunca se genera un Participante con piloto o jugador nulo.
+     */
     public void seleccionarPiloto(int pilotoId) {
-        Piloto piloto = pilotoService.seleccionarPiloto(pilotoId); // validación y búsqueda
-        configuracionCarrera.setPilotoSeleccionado(piloto);        // almacenamiento en configuración
+        Piloto piloto = pilotoService.seleccionarPiloto(pilotoId);
+        configuracionCarrera.setPilotoSeleccionado(piloto);
+
+        Jugador jugadorPrincipal = configuracionCarrera.getJugadorPrincipal();
+        if (jugadorPrincipal != null && piloto != null) {
+            // Reemplazar la lista de participantes con el principal ya completo
+            configuracionCarrera.setParticipantes(
+                    List.of(new Participante(jugadorPrincipal, piloto))
+            );
+        }
+        // Si jugadorPrincipal aún es null (nunca debería pasar con el flujo corregido
+        // del Main) simplemente no armamos participantes aquí; el Main lo hará
+        // explícitamente después.
     }
 
+    // ── CU10 ─────────────────────────────────────────
+    /**
+     * Agrega los participantes adicionales (multijugador) a los ya existentes.
+     * No reemplaza la lista completa para no perder al jugador principal.
+     */
+    public void seleccionarParticipantes(List<Integer> idsUsuarios, List<Integer> idsPilotos) {
+        ParticipanteService participanteService = new ParticipanteService();
+        List<Participante> adicionales = participanteService.crearParticipantes(idsUsuarios, idsPilotos);
+        // Agregar a los participantes existentes (no reemplazar)
+        for (Participante p : adicionales) {
+            configuracionCarrera.agregarParticipante(p);
+        }
+    }
 
-   // CU10 - Seleccionar participantes
-    //public void seleccionarParticipantes(List<Integer> idsPilotos) {
-      //  List<Piloto> participantes = pilotoService.obtenerParticipantes(idsPilotos);
-        //configuracionCarrera.setParticipantes(participantes);
-    //}
-    //falta usuarios para que se puede hacer
-
-
-    // CU11 - Seleccionar circuito
+    // ── CU11 ─────────────────────────────────────────
     public void seleccionarCircuito(int circuitoId) {
-        Circuito circuito = circuitoService.obtenerCircuito(circuitoId); // devuelve un Circuito concreto
-        configuracionCarrera.setCircuito(circuito); // ahora sí funciona
+        Circuito circuito = circuitoService.obtenerCircuito(circuitoId);
+        configuracionCarrera.setCircuito(circuito);
     }
 
-
-    // CU12 - Configurar carrera
+    // ── CU12 ─────────────────────────────────────────
     public void configurarCarrera(int vueltas, String clima) {
         configuracionCarrera.setVueltas(vueltas);
         configuracionCarrera.setClimaInicial(clima);
     }
 
-    // CU21 - Gestionar pilotos
-    public void gestionarPilotos(Piloto piloto) {
-        //pilotoService.gestionarPiloto(piloto);
-    }
+    // ── Admin ─────────────────────────────────────────
+    public void gestionarPilotos(Piloto piloto)               { /* CU21 */ }
+    public void gestionarEscuderias(Escuderia escuderia)       { /* CU22 */ }
+    public void administrarConfiguraciones(ConfiguracionCarrera c) { this.configuracionCarrera = c; }
 
-    // CU22 - Gestionar escuderías
-    public void gestionarEscuderias(Escuderia escuderia) {
-      //  escuderiaService.gestionarEscuderia(escuderia);
-    }
-
-    // CU23 - Administrar configuraciones
-    public void administrarConfiguraciones(ConfiguracionCarrera config) {
-        this.configuracionCarrera = config;
-    }
-
-    // Método final para iniciar la carrera
+    // ── Inicio carrera ────────────────────────────────
     public Carrera iniciarCarrera() {
         return new Carrera(configuracionCarrera);
     }

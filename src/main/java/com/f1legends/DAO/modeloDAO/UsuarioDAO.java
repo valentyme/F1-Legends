@@ -177,4 +177,29 @@ public class UsuarioDAO {
             default -> throw new IllegalStateException("Rol desconocido: " + rol);
         };
     }
+    // ──────────────────────────────────────────────
+// Listar solo jugadores
+// ──────────────────────────────────────────────
+    public List<Jugador> listarJugadores() {
+        List<Jugador> lista = new ArrayList<>();
+        String sql = "SELECT id, username, password, rol, fecha_registro FROM Usuarios WHERE rol = 'Jugador' ORDER BY username";
+        try (Connection conn = ConexionBD.conectar();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                // mapear directamente a Jugador
+                Jugador j = new Jugador(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("fecha_registro")
+                );
+                lista.add(j);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar jugadores: " + e.getMessage(), e);
+        }
+        return lista;
+    }
+
 }

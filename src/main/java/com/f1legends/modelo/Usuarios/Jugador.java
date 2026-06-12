@@ -1,5 +1,7 @@
 package com.f1legends.modelo.Usuarios;
 
+import java.util.ArrayList;
+
 /**
  * Representa un usuario con rol Jugador.
  *
@@ -24,6 +26,7 @@ public class Jugador extends Usuario {
                 "CU07 - Cerrar sesión"
         };
     }
+
 
     @Override
     public String toString() {

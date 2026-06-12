@@ -8,6 +8,7 @@ import com.f1legends.DAO.modeloDAO.UsuarioDAO;
 import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.Usuarios.Administrador;
 import com.f1legends.modelo.Usuarios.Jugador;
+import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.Usuarios.Usuario;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
@@ -21,22 +22,19 @@ import com.f1legends.patrones.factory.TipoAuto;
 import com.f1legends.modelo.circuitos.Circuito;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
-/**
- * Punto de entrada del programa F1 Legends.
- * Vista de consola que cubre: CU01, CU02, CU03, CU05, CU06, CU07
- * y el flujo de juego (CU08–CU12) para el rol Jugador.
- */
+
 public class Main {
 
     // ── DAOs ──────────────────────────────────────
-    private static final UsuarioDAO     usuarioDAO     = new UsuarioDAO();
-    private static final RankingGlobalDAO rankingDAO   = new RankingGlobalDAO();
-    private static final PilotoDAO      pilotoDAO      = new PilotoDAO();
-    private static final CircuitoDAO    circuitoDAO    = new CircuitoDAO();
+    private static final UsuarioDAO       usuarioDAO  = new UsuarioDAO();
+    private static final RankingGlobalDAO rankingDAO  = new RankingGlobalDAO();
+    private static final PilotoDAO        pilotoDAO   = new PilotoDAO();
+    private static final CircuitoDAO      circuitoDAO = new CircuitoDAO();
 
     // ── Sesión activa ─────────────────────────────
     private static Usuario sesionActual = null;
@@ -224,12 +222,11 @@ public class Main {
             System.out.println("  Sin cambios.");
             return;
         }
-        String userFinal = nuevoUser.isBlank()  ? sesionActual.getUsername() : nuevoUser;
-        String passFinal = nuevoPass.isBlank()  ? sesionActual.getPassword() : nuevoPass;
+        String userFinal = nuevoUser.isBlank() ? sesionActual.getUsername() : nuevoUser;
+        String passFinal = nuevoPass.isBlank() ? sesionActual.getPassword() : nuevoPass;
 
         try {
             usuarioDAO.actualizar(sesionActual.getId(), userFinal, passFinal);
-            // Actualizar objeto en sesión
             sesionActual.setUsername(userFinal);
             sesionActual.setPassword(passFinal);
             msgOk("Perfil actualizado correctamente.");
@@ -251,7 +248,6 @@ public class Main {
             try { idObjetivo = Integer.parseInt(sc.nextLine().trim()); }
             catch (NumberFormatException e) { msgError("ID inválido."); return; }
         } else {
-            // Jugador solo puede eliminar su propia cuenta
             idObjetivo = sesionActual.getId();
             System.out.print("  ¿Seguro que querés eliminar tu cuenta? [S/N]: ");
             if (!sc.nextLine().trim().equalsIgnoreCase("S")) {
@@ -263,7 +259,6 @@ public class Main {
         try {
             usuarioDAO.eliminar(idObjetivo);
             msgOk("Usuario id=" + idObjetivo + " eliminado junto a su historial de ranking.");
-            // Si eliminó su propia cuenta, cerrar sesión
             if (sesionActual != null && sesionActual.getId() == idObjetivo) {
                 sesionActual = null;
             }
@@ -284,6 +279,8 @@ public class Main {
     // ════════════════════════════════════════════════
     // FLUJO DE JUEGO — Jugador
     // ════════════════════════════════════════════════
+
+
     private static String seleccionarModoJuego(SistemaCarreraFacade facade) {
         subtitulo("CU08 — SELECCIONAR MODO DE JUEGO");
         System.out.println("  [1] Singleplayer");
@@ -309,125 +306,413 @@ public class Main {
         }
     }
 
-    private static void flujoJugarCarrera(Jugador jugador) {
-        SistemaCarreraFacade facade = new SistemaCarreraFacade();
 
-        subtitulo("PREPARANDO CARRERA");
-
-        String modo = seleccionarModoJuego(facade);
-        if (modo == null) return;
-
-        // CU09 — Seleccionar piloto
-        List<Piloto> pilotos = PilotoDAO.obtenerTodos();
-        if (pilotos.isEmpty()) { msgError("No hay pilotos disponibles en la BD."); return; }
-
+    private static int pedirIdPiloto(List<Piloto> pilotos) {
         System.out.println("  PILOTOS DISPONIBLES:");
         for (Piloto p : pilotos) {
-            System.out.printf("  [%2d] %-25s  Habilidad: %d%n", p.getId(), p.getNombre(), p.getHabilidad());
+            System.out.printf("  [%2d] %-25s  Habilidad: %d%n",
+                    p.getId(), p.getNombre(), p.getHabilidad());
         }
         System.out.print("  Seleccioná el ID de tu piloto: ");
-        int pilotoId;
-        try { pilotoId = Integer.parseInt(sc.nextLine().trim()); }
-        catch (NumberFormatException e) { msgError("ID inválido."); return; }
+        try {
+            return Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            msgError("ID inválido.");
+            return -1;
+        }
+    }
 
-        facade.seleccionarPiloto(pilotoId); // ahora lo maneja el Facade
-        Piloto pilotoElegido = facade.getConfiguracionCarrera().getPilotoSeleccionado();
+    private static Piloto validarPilotoEnLista(int idPiloto, List<Piloto> pilotos) {
+        return pilotos.stream()
+                .filter(p -> p.getId() == idPiloto)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static Piloto seleccionarPilotoSingleplayer(SistemaCarreraFacade facade) {
+        subtitulo("CU09 — SELECCIONAR PILOTO");
+
+        List<Piloto> pilotos = PilotoDAO.obtenerTodos();
+        if (pilotos.isEmpty()) {
+            msgError("No hay pilotos disponibles en la BD.");
+            return null;
+        }
+
+        int idPiloto = pedirIdPiloto(pilotos);
+        if (idPiloto == -1) return null;
+
+        Piloto pilotoElegido = validarPilotoEnLista(idPiloto, pilotos);
+        if (pilotoElegido == null) {
+            msgError("No existe un piloto con ese ID.");
+            return null;
+        }
+
+        facade.seleccionarPiloto(idPiloto);
+
+
+        Jugador jugadorPrincipal = (Jugador) sesionActual;
+
+        if (facade.getConfiguracionCarrera().getJugadorPrincipal() == null) {
+            facade.getConfiguracionCarrera().setJugadorPrincipal(jugadorPrincipal);
+        }
+
+        List<Participante> participantes = new ArrayList<>();
+        participantes.add(new Participante(jugadorPrincipal, pilotoElegido));
+        facade.getConfiguracionCarrera().setParticipantes(participantes);
+
         msgOk("Piloto seleccionado: " + pilotoElegido.getNombre());
+        return pilotoElegido;
+    }
 
-        // CU11 — Seleccionar circuito
+
+    private static CircuitoDTO seleccionarCircuitoDTO() {
+        subtitulo("CU11 — SELECCIONAR CIRCUITO");
+
         List<CircuitoDTO> circuitos = circuitoDAO.obtenerTodos();
-        if (circuitos.isEmpty()) { msgError("No hay circuitos en la BD."); return; }
+        if (circuitos.isEmpty()) {
+            msgError("No hay circuitos en la BD.");
+            return null;
+        }
 
         System.out.println("\n  CIRCUITOS DISPONIBLES:");
         for (CircuitoDTO c : circuitos) {
             System.out.printf("  [%2d] %-35s  %s  (%d vueltas)%n",
                     c.getId(), c.getNombre(), c.getPais(), c.getVueltas());
         }
+
         System.out.print("  Seleccioná el ID del circuito: ");
         int circuitoId;
-        try { circuitoId = Integer.parseInt(sc.nextLine().trim()); }
-        catch (NumberFormatException e) { msgError("ID inválido."); return; }
+        try {
+            circuitoId = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            msgError("ID inválido.");
+            return null;
+        }
 
-        facade.seleccionarCircuito(circuitoId); // Facade se encarga
+        CircuitoDTO elegido = circuitos.stream()
+                .filter(c -> c.getId() == circuitoId)
+                .findFirst()
+                .orElse(null);
+
+        if (elegido == null) {
+            msgError("No existe un circuito con ese ID.");
+            return null;
+        }
+
+        return elegido;
+    }
+    private static Circuito aplicarCircuito(SistemaCarreraFacade facade, CircuitoDTO dto) {
+        facade.seleccionarCircuito(dto.getId());
         Circuito circuito = facade.getConfiguracionCarrera().getCircuito();
+        if (circuito == null) {
+            msgError("Error al cargar el circuito desde la configuración.");
+            return null;
+        }
         msgOk("Circuito: " + circuito.getNombre() + " — " + circuito.getPais());
+        return circuito;
+    }
 
-        // CU12 — Configurar vueltas y clima
-        System.out.print("\n  Número de vueltas [1-" + circuitoDAO.obtenerPorId(circuitoId).getVueltas() + "]: ");
+    private static int pedirVueltas(int maxVueltas) {
+        System.out.print("\n  Número de vueltas [1-" + maxVueltas + "]: ");
         int vueltas;
-        try { vueltas = Integer.parseInt(sc.nextLine().trim()); }
-        catch (NumberFormatException e) { vueltas = 3; }
-        vueltas = Math.max(1, Math.min(vueltas, circuitoDAO.obtenerPorId(circuitoId).getVueltas()));
+        try {
+            vueltas = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            vueltas = 3;
+        }
+        return Math.max(1, Math.min(vueltas, maxVueltas));
+    }
 
+    private static String pedirClima() {
         System.out.println("  Clima: [1] Soleado  [2] Lluvioso  [3] Nublado");
         System.out.print("  Opción: ");
-        String clima = switch (sc.nextLine().trim()) {
+        return switch (sc.nextLine().trim()) {
             case "2" -> "Lluvioso";
             case "3" -> "Nublado";
             default  -> "Soleado";
         };
+    }
 
+    private static void configurarCarrera(SistemaCarreraFacade facade, int maxVueltas) {
+        subtitulo("CU12 — CONFIGURAR CARRERA");
+        int vueltas = pedirVueltas(maxVueltas);
+        String clima = pedirClima();
         facade.configurarCarrera(vueltas, clima);
+    }
 
-        // Iniciar carrera desde el Facade
-        Carrera carrera = facade.iniciarCarrera();
+    // ── Multijugador ─────────────────────────────────────────────────────────
 
-        // Pasar la carrera ya configurada a la simulación
-        simularCarrera(jugador, pilotoElegido, circuito, circuito.getNombre(), vueltas, clima);
+    private static Jugador validarJugadorAdicional(int idUsuario,
+                                                   Jugador jugadorPrincipal,
+                                                   List<Integer> idsYaElegidos) {
+        Optional<Usuario> opt = usuarioDAO.buscarPorId(idUsuario);
+        if (opt.isEmpty() || !(opt.get() instanceof Jugador)) {
+            msgError("No existe un jugador con ese ID.");
+            return null;
+        }
+        if (idUsuario == jugadorPrincipal.getId()) {
+            msgError("Ese usuario ya es el jugador principal. Elegí otro.");
+            return null;
+        }
+        if (idsYaElegidos.contains(idUsuario)) {
+            msgError("Ese usuario ya fue elegido. Elegí otro.");
+            return null;
+        }
+        return (Jugador) opt.get();
     }
 
 
-    /**
-     * Simula la carrera en consola usando la lógica real de Carrera + Auto.
-     * Al terminar genera el Ranking y suma puntos al RankingGlobal.
-     */
-    private static void simularCarrera(Jugador jugador, Piloto pilotoElegido,
-                                       Circuito circuito, String nombreCircuito,
-                                       int vueltas, String clima) {
-        linea();
-        System.out.println("  *** CARRERA EN " + nombreCircuito.toUpperCase() + " — " + vueltas + " VUELTAS — " + clima.toUpperCase() + " ***");
-        linea();
+    private static Piloto validarPilotoAdicional(int idPiloto,
+                                                 int idPilotoPrincipal,
+                                                 List<Integer> idsPilotosYaElegidos) {
+        Piloto piloto = PilotoDAO.obtenerPorId(idPiloto);
+        if (piloto == null) {
+            msgError("No existe un piloto con ese ID.");
+            return null;
+        }
+        if (idPiloto == idPilotoPrincipal) {
+            msgError("Ese piloto ya está asignado al jugador principal. Elegí otro.");
+            return null;
+        }
+        if (idsPilotosYaElegidos.contains(idPiloto)) {
+            msgError("Ese piloto ya fue elegido por otro jugador. Elegí otro.");
+            return null;
+        }
+        return piloto;
+    }
 
+
+    private static int leerEntero(String prompt) {
+        System.out.print(prompt);
+        try {
+            return Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            msgError("Número inválido.");
+            return -1;
+        }
+    }
+
+    private static boolean flujoMultijugador(SistemaCarreraFacade facade, Jugador jugadorPrincipal) {
+        subtitulo("MODO MULTIJUGADOR LOCAL");
+
+        // Paso 1: piloto del jugador principal
+        List<Piloto> todosLosPilotos = PilotoDAO.obtenerTodos();
+        if (todosLosPilotos.isEmpty()) {
+            msgError("No hay pilotos disponibles en la BD.");
+            return false;
+        }
+
+        int idPilotoPrincipal = pedirIdPiloto(todosLosPilotos);
+        if (idPilotoPrincipal == -1) return false;
+
+        Piloto pilotoPrincipal = validarPilotoEnLista(idPilotoPrincipal, todosLosPilotos);
+        if (pilotoPrincipal == null) {
+            msgError("No existe un piloto con ese ID.");
+            return false;
+        }
+
+        facade.seleccionarPiloto(idPilotoPrincipal);
+
+
+        if (facade.getConfiguracionCarrera().getJugadorPrincipal() == null) {
+            facade.getConfiguracionCarrera().setJugadorPrincipal(jugadorPrincipal);
+        }
+
+        msgOk("Piloto asignado al jugador principal: " + pilotoPrincipal.getNombre());
+
+        // Paso 2: mostrar jugadores disponibles
+        List<Jugador> jugadoresDisponibles = usuarioDAO.listarJugadores();
+        if (jugadoresDisponibles.isEmpty()) {
+            msgError("No hay jugadores adicionales registrados. No se puede iniciar multijugador.");
+            return false;
+        }
+
+        System.out.println("\n  JUGADORES DISPONIBLES:");
+        for (Jugador j : jugadoresDisponibles) {
+            System.out.printf("  [%d] %-20s%n", j.getId(), j.getUsername());
+        }
+
+        int cantidad = leerEntero("\n  ¿Cuántos jugadores adicionales participarán? ");
+        if (cantidad <= 0) {
+            msgError("Debe haber al menos 1 jugador adicional.");
+            return false;
+        }
+
+        List<Integer> idsUsuarios  = new ArrayList<>();
+        List<Integer> idsPilotos   = new ArrayList<>();
+
+
+        for (int i = 0; i < cantidad; ) {
+            System.out.printf("\n  Jugador adicional %d/%d%n", i + 1, cantidad);
+
+            int idUsuario = leerEntero("  ID Usuario: ");
+            if (idUsuario == -1) continue;
+
+            Jugador jugadorAdicional = validarJugadorAdicional(idUsuario, jugadorPrincipal, idsUsuarios);
+            if (jugadorAdicional == null) continue;
+
+            int idPiloto = leerEntero("  ID Piloto: ");
+            if (idPiloto == -1) continue;
+
+            Piloto pilotoAdicional = validarPilotoAdicional(idPiloto, idPilotoPrincipal, idsPilotos);
+            if (pilotoAdicional == null) continue;
+
+            idsUsuarios.add(idUsuario);
+            idsPilotos.add(idPiloto);
+            i++;
+        }
+
+        List<Participante> participantes = new ArrayList<>();
+        participantes.add(new Participante(jugadorPrincipal, pilotoPrincipal));
+        facade.getConfiguracionCarrera().setParticipantes(participantes);
+
+        facade.seleccionarParticipantes(idsUsuarios, idsPilotos);
+
+        msgOk("Participantes adicionales asignados correctamente.");
+        return true;
+    }
+
+
+    private static void flujoJugarCarrera(Jugador jugador) {
+        SistemaCarreraFacade facade = new SistemaCarreraFacade();
+
+        facade.getConfiguracionCarrera().setJugadorPrincipal(jugador);
+
+        subtitulo("PREPARANDO CARRERA");
+
+        String modo = seleccionarModoJuego(facade);
+        if (modo == null) return;
+
+        if ("Singleplayer".equals(modo)) {
+            Piloto pilotoElegido = seleccionarPilotoSingleplayer(facade);
+            if (pilotoElegido == null) return;
+
+            CircuitoDTO dto = seleccionarCircuitoDTO();
+            if (dto == null) return;
+
+            Circuito circuito = aplicarCircuito(facade, dto);
+            if (circuito == null) return;
+
+            configurarCarrera(facade, dto.getVueltas());
+
+            Carrera carrera = facade.iniciarCarrera();
+            simularCarrera(jugador, carrera, pilotoElegido, facade);
+
+        } else if ("Multijugador Local".equals(modo)) {
+            boolean ok = flujoMultijugador(facade, jugador);
+            if (!ok) return;
+
+            CircuitoDTO dto = seleccionarCircuitoDTO();
+            if (dto == null) return;
+
+            Circuito circuito = aplicarCircuito(facade, dto);
+            if (circuito == null) return;
+
+            configurarCarrera(facade, dto.getVueltas());
+
+            Carrera carrera = facade.iniciarCarrera();
+            Piloto pilotoPrincipal = facade.getConfiguracionCarrera().getPilotoSeleccionado();
+            simularCarrera(jugador, carrera, pilotoPrincipal, facade);
+        }
+    }
+
+    // ════════════════════════════════════════════════
+    // SIMULACIÓN DE CARRERA
+    // ════════════════════════════════════════════════
+
+    private static void simularCarrera(Jugador jugador, Carrera carrera,
+                                       Piloto pilotoElegido, SistemaCarreraFacade facade) {
+        if (carrera == null) {
+            msgError("No se pudo iniciar la carrera.");
+            return;
+        }
+
+        linea();
+        subtitulo("SIMULANDO CARRERA");
+        mostrarCabeceraCarrera(carrera);
+
+        prepararAutosBase(carrera);
+        prepararAutosParticipantes(carrera, facade);
+
+        carrera.iniciar();
+        System.out.println("  Semáforo apagado... luces encendidas... ¡VERDE!\n");
+
+        simularVueltas(carrera);
+        mostrarResultados(carrera, jugador);
+    }
+
+    private static void mostrarCabeceraCarrera(Carrera carrera) {
+        System.out.println("  *** CARRERA EN "
+                + carrera.getCircuito().getNombre().toUpperCase()
+                + " — " + carrera.getVueltas() + " VUELTAS — "
+                + carrera.getClimaInicial().toUpperCase() + " ***");
+        linea();
+    }
+
+    private static void prepararAutosBase(Carrera carrera) {
         FabricaAuto fabricaAuto = new FabricaAuto();
         FabricaEscuderia fabricaEscuderia = new FabricaEscuderia();
 
-// Escuderías desde la BD
-        Escuderia ferrariEsc  = fabricaEscuderia.crearEscuderia(1); // Ferrari
-        Escuderia mercedesEsc = fabricaEscuderia.crearEscuderia(2); // Mercedes
-        Escuderia redbullEsc  = fabricaEscuderia.crearEscuderia(3); // Red Bull
-        Escuderia mclarenEsc  = fabricaEscuderia.crearEscuderia(4); // McLaren
-        Escuderia alpineEsc   = fabricaEscuderia.crearEscuderia(5); // Alpine
-
-// Autos asociados a cada escudería
         Auto ferrari  = fabricaAuto.crearAuto(TipoAuto.FERRARI);
-        ferrari.setEscuderia(ferrariEsc);
+        ferrari.setEscuderia(fabricaEscuderia.crearEscuderia(1));
 
         Auto mercedes = fabricaAuto.crearAuto(TipoAuto.MERCEDES);
-        mercedes.setEscuderia(mercedesEsc);
+        mercedes.setEscuderia(fabricaEscuderia.crearEscuderia(2));
 
         Auto redbull  = fabricaAuto.crearAuto(TipoAuto.RED_BULL);
-        redbull.setEscuderia(redbullEsc);
+        redbull.setEscuderia(fabricaEscuderia.crearEscuderia(3));
 
-        Auto mclaren  = new Auto(4, "MCL60", 0.052, mclarenEsc);
-        Auto alpine   = new Auto(5, "A524", 0.050, alpineEsc);
+        Auto mclaren  = new Auto(4, "MCL60", 0.052, fabricaEscuderia.crearEscuderia(4));
+        Auto alpine   = new Auto(5, "A524",  0.050, fabricaEscuderia.crearEscuderia(5));
 
-        // Auto del jugador basado en la habilidad del piloto elegido
-        double velJugador = 0.046 + (pilotoElegido.getHabilidad() / 100.0) * 0.014;
-        Escuderia escJugador = new Escuderia(99, jugador.getUsername(), Color.RED);
-        Auto autoJugador = new Auto(99, pilotoElegido.getNombre(), velJugador, escJugador);
-
-        Carrera carrera = new Carrera(1, circuito, java.time.LocalDate.now().toString(), vueltas, clima);
-        carrera.agregarAuto(autoJugador);
         carrera.agregarAuto(ferrari);
         carrera.agregarAuto(mercedes);
         carrera.agregarAuto(redbull);
         carrera.agregarAuto(mclaren);
-        carrera.iniciar();
+        carrera.agregarAuto(alpine);
+    }
 
-        System.out.println("  Semáforo apagado... luces encendidas... ¡VERDE!");
-        System.out.println();
+    private static void prepararAutosParticipantes(Carrera carrera, SistemaCarreraFacade facade) {
+        List<Participante> participantes = facade.getConfiguracionCarrera().getParticipantes();
 
-        // Simulación por ticks hasta completar las vueltas
+        if (participantes == null || participantes.isEmpty()) {
+            msgError("No hay participantes registrados en la carrera.");
+            return;
+        }
+
+        for (Participante p : participantes) {
+            // Validación defensiva para evitar NullPointerException
+            if (p == null) {
+                msgError("Se encontró un participante nulo; se omite.");
+                continue;
+            }
+            if (p.getJugador() == null) {
+                msgError("Participante sin jugador asignado; se omite.");
+                continue;
+            }
+            if (p.getPiloto() == null) {
+                msgError("Participante sin piloto asignado (jugador: "
+                        + p.getJugador().getUsername() + "); se omite.");
+                continue;
+            }
+
+            double velocidad = 0.046 + (p.getPiloto().getHabilidad() / 100.0) * 0.014;
+            Escuderia esc = new Escuderia(
+                    p.getJugador().getId(),
+                    p.getJugador().getUsername(),
+                    Color.BLUE
+            );
+            Auto auto = new Auto(
+                    p.getJugador().getId(),
+                    p.getPiloto().getNombre(),
+                    velocidad,
+                    esc
+            );
+            carrera.agregarAuto(auto);
+        }
+    }
+
+    private static void simularVueltas(Carrera carrera) {
         final double DT = 0.05;
         int tick = 0;
         int ultimaVueltaMostrada = -1;
@@ -436,20 +721,19 @@ public class Main {
             carrera.actualizar(DT);
             tick++;
 
-            // Mostrar progreso cada vuelta que complete el líder
             int vueltaLider = carrera.getPosiciones().get(0).getVueltasCompletadas();
             if (vueltaLider > ultimaVueltaMostrada && vueltaLider > 0) {
                 ultimaVueltaMostrada = vueltaLider;
                 System.out.printf("  Vuelta %d/%d — Líder: %s%n",
-                        vueltaLider, vueltas,
+                        vueltaLider, carrera.getVueltas(),
                         carrera.getPosiciones().get(0).getModelo());
             }
 
-            // Guardia de seguridad (evita loop infinito si circuito no tiene lógica)
-            if (tick > 200_000) break;
+            if (tick > 200_000) break; // seguridad
         }
+    }
 
-        // Resultados finales
+    private static void mostrarResultados(Carrera carrera, Jugador jugador) {
         List<Auto> posiciones = carrera.getPosiciones();
         linea();
         System.out.println("  *** BANDERA A CUADROS ***");
@@ -457,13 +741,13 @@ public class Main {
         System.out.printf("  %-5s %-25s %s%n", "POS", "PILOTO / AUTO", "VUELTAS");
         linea();
 
-        int[] tablaPuntos = {25, 18, 15, 12, 10};
-        int posicionJugador = -1;
-        int puntosGanados   = 0;
+        int[] tablaPuntos     = {25, 18, 15, 12, 10};
+        int posicionJugador   = -1;
+        int puntosGanados     = 0;
 
         for (int i = 0; i < posiciones.size(); i++) {
             Auto a = posiciones.get(i);
-            boolean esJugador = a.getId() == 99;
+            boolean esJugador = (a.getId() == jugador.getId());
             String marca = esJugador ? " ← TÚ" : "";
             System.out.printf("  %-5s %-25s %d vueltas%s%n",
                     (i + 1) + "º", a.getModelo(), a.getVueltasCompletadas(), marca);
@@ -474,16 +758,14 @@ public class Main {
             }
         }
 
-        // Generar objeto Ranking (tal como está definido en el proyecto)
         Ranking ranking = new Ranking();
         ranking.setPosicion(posicionJugador);
         ranking.setPuntosTotales(puntosGanados);
 
         linea();
-        System.out.printf("  Posición final : %dº%n",   ranking.getPosicion());
+        System.out.printf("  Posición final : %dº%n", ranking.getPosicion());
         System.out.printf("  Puntos ganados : %d pts%n", ranking.getPuntosTotales());
 
-        // Guardar puntos en RankingGlobal
         if (ranking.getPuntosTotales() > 0) {
             rankingDAO.sumarPuntos(jugador.getId(), ranking.getPuntosTotales());
             msgOk("Puntos sumados al ranking global.");
