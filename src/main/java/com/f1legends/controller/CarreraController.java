@@ -285,8 +285,12 @@ public class CarreraController {
         };
 
         if (estrategia != null) {
-            facade.seleccionarEstrategiaConduccion(estrategia);
-            System.out.println("✅ Estrategia seleccionada: " + estrategia.getNombre());
+            boolean asignada = facade.seleccionarEstrategiaConduccion(estrategia);
+            if (asignada) {
+                System.out.println("✅ Estrategia seleccionada: " + estrategia.getNombre());
+            } else {
+                System.out.println("⚠ No hay piloto seleccionado. No se pudo asignar la estrategia.");
+            }
         } else {
             System.out.println("⚠ Opción inválida. Se usará estrategia por defecto.");
         }

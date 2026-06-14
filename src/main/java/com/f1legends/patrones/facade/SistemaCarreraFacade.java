@@ -18,12 +18,14 @@ public class SistemaCarreraFacade {
     private EscuderiaService     escuderiaService;
     private CircuitoService      circuitoService;
     private ModoJuegoService     modoJuegoService;
+    private ParticipanteService  participanteService;
 
     public SistemaCarreraFacade() {
         this.pilotoService       = new PilotoService();
         this.escuderiaService    = new EscuderiaService();
         this.circuitoService     = new CircuitoService();
         this.modoJuegoService    = new ModoJuegoService();
+        this.participanteService = new ParticipanteService();
         this.configuracionCarrera = new ConfiguracionCarrera();
     }
 
@@ -55,7 +57,6 @@ public class SistemaCarreraFacade {
     // ── CU10 ─────────────────────────────────────────
 
     public void seleccionarParticipantes(List<Integer> idsUsuarios, List<Integer> idsPilotos) {
-        ParticipanteService participanteService = new ParticipanteService();
         List<Participante> adicionales = participanteService.crearParticipantes(idsUsuarios, idsPilotos);
         // Agregar a los participantes existentes (no reemplazar)
         for (Participante p : adicionales) {
@@ -83,11 +84,7 @@ public class SistemaCarreraFacade {
     }
 
     // ── CU22 ─────────────────────────────────────────
-    public void gestionarEscuderias(String operacion, Escuderia escuderia) {
-        escuderiaService.gestionarEscuderias(operacion, escuderia);
-    }
-
-    // Métodos directos si querés usarlos sin "operacion"
+    // Métodos directos para gestionar escuderías
     public void altaEscuderia(String nombre, String colorHex) {
         escuderiaService.altaEscuderia(nombre, colorHex);
     }
@@ -105,17 +102,15 @@ public class SistemaCarreraFacade {
     }
 
     // ── CUXX ─────────────────────────────────────────
-    public void seleccionarEstrategiaConduccion(EstrategiaConduccion estrategia) {
-        Piloto piloto = configuracionCarrera.getPilotoSeleccionado();
-        if (piloto != null) {
-            piloto.setEstrategiaConduccion(estrategia);
-            System.out.println("Estrategia asignada: " + estrategia.getNombre());
-        } else {
-            System.out.println("No hay piloto seleccionado.");
-        }
-    }
 
-    public void administrarConfiguraciones(ConfiguracionCarrera c) { this.configuracionCarrera = c; }
+    public boolean seleccionarEstrategiaConduccion(EstrategiaConduccion estrategia) {
+        Piloto piloto = configuracionCarrera.getPilotoSeleccionado();
+        if (piloto == null) {
+            return false;
+        }
+        piloto.setEstrategiaConduccion(estrategia);
+        return true;
+    }
 
     // ── Inicio carrera ────────────────────────────────
     public Carrera iniciarCarrera() {
