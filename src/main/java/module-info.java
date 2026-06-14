@@ -16,4 +16,5 @@ module com.f1legends {
     exports com.f1legends.modelo.carreras;
     exports com.f1legends.modelo.auto;
     exports com.f1legends.utiles;
+    exports com.f1legends.controller;
 }

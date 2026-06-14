@@ -82,8 +82,26 @@ public class SistemaCarreraFacade {
         pilotoService.gestionarPilotos(operacion, piloto);
     }
 
+    // ── CU22 ─────────────────────────────────────────
     public void gestionarEscuderias(String operacion, Escuderia escuderia) {
         escuderiaService.gestionarEscuderias(operacion, escuderia);
+    }
+
+    // Métodos directos si querés usarlos sin "operacion"
+    public void altaEscuderia(String nombre, String colorHex) {
+        escuderiaService.altaEscuderia(nombre, colorHex);
+    }
+
+    public void bajaEscuderia(int id) {
+        escuderiaService.bajaEscuderia(id);
+    }
+
+    public void modificarEscuderia(int id, String nombre, String colorHex) {
+        escuderiaService.modificarEscuderia(id, nombre, colorHex);
+    }
+
+    public List<Escuderia> consultarEscuderias() {
+        return escuderiaService.consultarEscuderias();
     }
 
     // ── CUXX ─────────────────────────────────────────

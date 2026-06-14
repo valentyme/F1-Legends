@@ -53,11 +53,7 @@ public class ConfiguracionCarrera {
 
     public Jugador getJugadorPrincipal()                { return jugadorPrincipal; }
 
-    /**
-     * Registra el jugador principal en la sesión de configuración.
-     * NO crea ningún Participante aquí — eso ocurre cuando el piloto
-     * ya está elegido (ver SistemaCarreraFacade.seleccionarPiloto).
-     */
+
     public void setJugadorPrincipal(Jugador jugador)    { this.jugadorPrincipal = jugador; }
 
     public void agregarParticipante(Participante p) {
