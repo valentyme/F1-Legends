@@ -6,6 +6,7 @@ import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.circuitos.Circuito;
+import com.f1legends.patrones.estrategias.EstrategiaConduccion;
 import com.f1legends.servicios.*;
 
 import java.util.List;
@@ -81,7 +82,21 @@ public class SistemaCarreraFacade {
         pilotoService.gestionarPilotos(operacion, piloto);
     }
 
-    public void gestionarEscuderias(Escuderia escuderia)       { /* CU22 */ }
+    public void gestionarEscuderias(String operacion, Escuderia escuderia) {
+        escuderiaService.gestionarEscuderias(operacion, escuderia);
+    }
+
+    // ── CUXX ─────────────────────────────────────────
+    public void seleccionarEstrategiaConduccion(EstrategiaConduccion estrategia) {
+        Piloto piloto = configuracionCarrera.getPilotoSeleccionado();
+        if (piloto != null) {
+            piloto.setEstrategiaConduccion(estrategia);
+            System.out.println("Estrategia asignada: " + estrategia.getNombre());
+        } else {
+            System.out.println("No hay piloto seleccionado.");
+        }
+    }
+
     public void administrarConfiguraciones(ConfiguracionCarrera c) { this.configuracionCarrera = c; }
 
     // ── Inicio carrera ────────────────────────────────

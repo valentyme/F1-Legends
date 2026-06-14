@@ -11,6 +11,10 @@ import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.carreras.Ranking;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.patrones.circuitoFactory.CircuitoFactory;
+import com.f1legends.patrones.estrategias.EstrategiaAgresiva;
+import com.f1legends.patrones.estrategias.EstrategiaConduccion;
+import com.f1legends.patrones.estrategias.EstrategiaConservadora;
+import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.fabricaEscuderia.FabricaEscuderia;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.factory.FabricaAuto;
@@ -397,14 +401,13 @@ public class Main {
     // CU22 — Gestion Escuderias
     // ════════════════════════════════════════════════
     private static void cuGestionarEscuderias() {
-        // Similar a cuGestionarPilotos, pero usando EscuderiaDAO
         linea();
         titulo("  GESTIONAR ESCUDERÍAS (CU22)");
         linea();
         System.out.println("  [1] Alta de escudería");
         System.out.println("  [2] Baja de escudería");
         System.out.println("  [3] Modificar escudería");
-        System.out.println("  [4] Consultar escudería");
+        System.out.println("  [4] Consultar escuderías");
         System.out.print("  Opción: ");
         String opcion = sc.nextLine().trim();
 
@@ -417,15 +420,13 @@ public class Main {
                 Color color = PaletaColoresDemo.mostrarPicker();
                 Escuderia escuderia = new Escuderia(0, nombre, color);
                 escuderiaDAO.insertar(escuderia);
-
-                System.out.println("Escudería registrada: " + nombre);
             }
             case "2" -> {
                 mostrarEscuderias();
                 System.out.print("ID de escudería a eliminar: ");
                 int id = Integer.parseInt(sc.nextLine());
                 escuderiaDAO.eliminar(id);
-                System.out.println("Escudería eliminada.");
+                System.out.println("✅ Escudería eliminada.");
             }
             case "3" -> {
                 mostrarEscuderias();
@@ -444,11 +445,10 @@ public class Main {
                     System.out.println("⚠ Color inválido. Debe ser en formato #RRGGBB (ej: #FF0000).");
                 }
             }
-
             case "4" -> {
                 mostrarEscuderias();
             }
-            default -> msgError("Opción inválida.");
+            default -> msgError("⚠ Opción inválida.");
         }
     }
 
@@ -762,6 +762,7 @@ public class Main {
         if ("Singleplayer".equals(modo)) {
             Piloto pilotoElegido = seleccionarPilotoSingleplayer(facade);
             if (pilotoElegido == null) return;
+            seleccionarEstrategia(facade);
 
             CircuitoDTO dto = seleccionarCircuitoDTO();
             if (dto == null) return;
@@ -777,6 +778,7 @@ public class Main {
         } else if ("Multijugador Local".equals(modo)) {
             boolean ok = flujoMultijugador(facade, jugador);
             if (!ok) return;
+            seleccionarEstrategia(facade);
 
             CircuitoDTO dto = seleccionarCircuitoDTO();
             if (dto == null) return;
@@ -789,6 +791,28 @@ public class Main {
             Carrera carrera = facade.iniciarCarrera();
             Piloto pilotoPrincipal = facade.getConfiguracionCarrera().getPilotoSeleccionado();
             simularCarrera(jugador, carrera, pilotoPrincipal, facade);
+        }
+    }
+    private static void seleccionarEstrategia(SistemaCarreraFacade facade) {
+        System.out.println("Seleccioná estrategia de conducción:");
+        System.out.println("  [1] Agresiva");
+        System.out.println("  [2] Equilibrada");
+        System.out.println("  [3] Conservadora");
+        System.out.print("  Opción: ");
+        String op = sc.nextLine().trim();
+
+        EstrategiaConduccion estrategia = switch (op) {
+            case "1" -> new EstrategiaAgresiva();
+            case "2" -> new EstrategiaEquilibrada();
+            case "3" -> new EstrategiaConservadora();
+            default  -> null;
+        };
+
+        if (estrategia != null) {
+            facade.seleccionarEstrategiaConduccion(estrategia);
+            System.out.println("✅ Estrategia seleccionada: " + estrategia.getNombre());
+        } else {
+            System.out.println("⚠ Opción inválida. Se usará estrategia por defecto.");
         }
     }
 

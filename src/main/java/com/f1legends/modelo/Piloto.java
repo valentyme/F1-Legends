@@ -36,18 +36,25 @@ Piloto {
     public int getEscuderiaId() { return escuderiaId; }
     public int getAutoId() { return autoId; }
 
-    public double calcularRendimiento(double condicionesPista) {
-        return estrategia.calcularRendimiento(this, condicionesPista);
-    }
 
-    public String getEstrategiaNombre() {
-        return estrategia.getNombre();
-    }
     public void setId(int id) { this.id = id; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public void setHabilidad(int habilidad) { this.habilidad = habilidad; }
     public void setEscuderiaId(int escuderiaId) { this.escuderiaId = escuderiaId; }
     public void setAutoId(int autoId) { this.autoId = autoId; }
+
+
+    public void setEstrategiaConduccion(EstrategiaConduccion estrategia) {
+        this.estrategia = estrategia;
+    }
+
+    public double calcularRendimiento(double condicionesPista) {
+        if (estrategia == null) {
+            return habilidad * condicionesPista; // default
+        }
+        return estrategia.calcularRendimiento(this, condicionesPista);
+    }
+
     @Override
     public String toString() {
         return nombre + " (Habilidad: " + habilidad + ")";
