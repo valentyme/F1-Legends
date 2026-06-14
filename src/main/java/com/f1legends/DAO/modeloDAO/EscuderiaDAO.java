@@ -2,8 +2,8 @@ package com.f1legends.DAO.modeloDAO;
 
 import com.f1legends.DAO.ConexionBD;
 import com.f1legends.modelo.Escuderias.Escuderia;
+import com.f1legends.utiles.ColorUtil;
 import javafx.scene.paint.Color;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class EscuderiaDAO {
     }
 
     // Listar todas las escuderías
-    public List<Escuderia> obtenerTodos() {
+    public static List<Escuderia> obtenerTodos() {
         List<Escuderia> lista = new ArrayList<>();
         String sql = "SELECT id, nombre, color FROM Escuderias";
         try (Connection conn = ConexionBD.conectar();
@@ -74,4 +74,64 @@ public class EscuderiaDAO {
         }
         return lista;
     }
+    // Alta
+    public void insertar(Escuderia escuderia) {
+        String sql = "INSERT INTO Escuderias (nombre, color) VALUES (?, ?)";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, escuderia.getNombre());
+            pstmt.setString(2, escuderia.getColor().toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // Baja
+    public void eliminar(int id) {
+        try (Connection conn = ConexionBD.conectar()) {
+            // 1. Eliminar pilotos de la escudería
+            String sqlPilotos = "DELETE FROM Pilotos WHERE escuderia_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlPilotos)) {
+                pstmt.setInt(1, id);
+                pstmt.executeUpdate();
+            }
+
+            // 2. Eliminar autos de la escudería
+            String sqlAutos = "DELETE FROM Autos WHERE escuderia_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlAutos)) {
+                pstmt.setInt(1, id);
+                pstmt.executeUpdate();
+            }
+
+            // 3. Eliminar la escudería
+            String sqlEscuderia = "DELETE FROM Escuderias WHERE id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlEscuderia)) {
+                pstmt.setInt(1, id);
+                pstmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void actualizar(Escuderia escuderia) {
+        String sql = "UPDATE Escuderias SET nombre = ?, color = ? WHERE id = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, escuderia.getNombre());
+            pstmt.setString(2, ColorUtil.toHex(escuderia.getColor()));
+            pstmt.setInt(3, escuderia.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+
 }

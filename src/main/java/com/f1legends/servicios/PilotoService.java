@@ -21,26 +21,49 @@ public class PilotoService {
     // Seleccionar piloto por ID
 
     public Piloto seleccionarPiloto(int id) {
-        Piloto piloto = dao.obtenerPorId(id); // ✅ uso del DAO instanciado
+        Piloto piloto = dao.obtenerPorId(id);
         if (piloto == null) {
             throw new IllegalArgumentException("Piloto no encontrado con ID: " + id);
         }
         return piloto;
     }
-
-    // Listar todos los pilotos
     public List<Piloto> listarPilotos() {
-        return PilotoDAO.obtenerTodos();
+        return dao.obtenerTodos();
     }
+
     public List<Piloto> obtenerParticipantes(List<Integer> idsPilotos) {
         List<Piloto> lista = new ArrayList<>();
         for (Integer id : idsPilotos) {
-            Piloto piloto = PilotoDAO.obtenerPorId(id);
+            Piloto piloto = dao.obtenerPorId(id);
             if (piloto != null) {
                 lista.add(piloto);
             }
         }
         return lista;
     }
+    public void gestionarPilotos(String operacion, Piloto piloto) {
+        switch (operacion.toLowerCase()) {
+            case "alta":
+                dao.insertar(piloto);
+                break;
+            case "baja":
+                dao.eliminar(piloto.getId());
+                break;
+            case "modificacion":
+                dao.actualizar(piloto);
+                break;
+            case "consulta":
+                Piloto encontrado = dao.obtenerPorId(piloto.getId());
+                if (encontrado != null) {
+                    System.out.println("Piloto encontrado: " + encontrado.getNombre());
+                } else {
+                    System.out.println("No se encontró piloto con ID: " + piloto.getId());
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Operación no válida en gestionarPilotos");
+        }
 
+
+    }
 }

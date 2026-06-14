@@ -1,10 +1,6 @@
 package com.f1legends.vista;
 
-import com.f1legends.DAO.modeloDAO.CircuitoDAO;
-import com.f1legends.DAO.modeloDAO.CircuitoDTO;
-import com.f1legends.DAO.modeloDAO.PilotoDAO;
-import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
-import com.f1legends.DAO.modeloDAO.UsuarioDAO;
+import com.f1legends.DAO.modeloDAO.*;
 import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.Usuarios.Administrador;
 import com.f1legends.modelo.Usuarios.Jugador;
@@ -20,7 +16,14 @@ import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.factory.FabricaAuto;
 import com.f1legends.patrones.factory.TipoAuto;
 import com.f1legends.modelo.circuitos.Circuito;
+import com.f1legends.utiles.PaletaColoresDemo;
 import javafx.scene.paint.Color;
+
+import javafx.scene.control.ColorPicker;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,6 +120,8 @@ public class Main {
         System.out.println("  [1] Ver ranking global       (CU03)");
         System.out.println("  [2] Eliminar perfil de usuario (CU06)");
         System.out.println("  [3] Listar todos los usuarios");
+        System.out.println("  [4] Gestionar pilotos        (CU21)");
+        System.out.println("  [5] Gestionar escuderías (CU22)");
         System.out.println("  [0] Cerrar sesión            (CU07)");
         linea();
         System.out.print("  Opción: ");
@@ -124,6 +129,8 @@ public class Main {
             case "1"  -> cuVerRanking();
             case "2"  -> cuEliminarPerfil(true);
             case "3"  -> listarUsuarios();
+            case "4"  -> cuGestionarPilotos();
+            case "5"  -> cuGestionarEscuderias();
             case "0"  -> cuCerrarSesion();
             default   -> msgError("Opción inválida.");
         }
@@ -274,6 +281,175 @@ public class Main {
         subtitulo("CU07 — CERRAR SESIÓN");
         msgOk("Sesión cerrada. ¡Hasta la próxima, " + sesionActual.getUsername() + "!");
         sesionActual = null;
+    }
+    // ════════════════════════════════════════════════
+    // CU21 — Gestion Pilotos
+    // ════════════════════════════════════════════════
+    private static void cuGestionarPilotos() {
+        SistemaCarreraFacade sistemaFacade = new SistemaCarreraFacade();
+        AutoDAO autoDAO = new AutoDAO(); // DAO para buscar autos
+
+        linea();
+        titulo("  GESTIONAR PILOTOS (CU21)");
+        linea();
+        System.out.println("  [1] Alta de piloto");
+        System.out.println("  [2] Baja de piloto");
+        System.out.println("  [3] Modificar piloto");
+        System.out.println("  [4] Consultar piloto");
+        System.out.print("  Opción: ");
+        String opcion = sc.nextLine().trim();
+
+        Piloto piloto;
+        switch (opcion) {
+            case "1" -> {
+                System.out.print("Nombre del piloto: ");
+                String nombre = sc.nextLine();
+                System.out.print("Habilidad: ");
+                int habilidad = Integer.parseInt(sc.nextLine());
+                mostrarEscuderias();
+                System.out.print("ID de escudería: ");
+                int escuderiaId = Integer.parseInt(sc.nextLine());
+
+                // Buscar el auto asociado a la escudería
+                Auto auto = autoDAO.obtenerPorEscuderiaId(escuderiaId);
+                int autoId = auto.getId();
+                piloto = new Piloto(0, nombre, habilidad, escuderiaId, autoId);
+                sistemaFacade.gestionarPilotos("alta", piloto);
+
+                mostrarPiloto(piloto);
+            }
+            case "2" -> {
+                mostrarPilotos(); // mostrar antes de eliminar
+                System.out.print("ID del piloto a eliminar: ");
+                int id = Integer.parseInt(sc.nextLine());
+                piloto = new Piloto(id, "", 0, 0, 0);
+                sistemaFacade.gestionarPilotos("baja", piloto);
+            }
+
+            case "3" -> {
+                mostrarPilotos(); // mostrar antes de modificar
+                System.out.print("ID del piloto a modificar: ");
+                int id = Integer.parseInt(sc.nextLine());
+                System.out.print("Nuevo nombre: ");
+                String nombre = sc.nextLine();
+                System.out.print("Nueva habilidad: ");
+                int habilidad = Integer.parseInt(sc.nextLine());
+                System.out.print("Nuevo ID de escudería: ");
+                int escuderiaId = Integer.parseInt(sc.nextLine());
+
+                Auto auto = autoDAO.obtenerPorEscuderiaId(escuderiaId);
+                int autoId = auto.getId();
+
+                piloto = new Piloto(id, nombre, habilidad, escuderiaId, autoId);
+                sistemaFacade.gestionarPilotos("modificacion", piloto);
+            }
+
+            case "4" -> {
+                System.out.print("ID del piloto a consultar: ");
+                int id = Integer.parseInt(sc.nextLine());
+                piloto = new Piloto(id, "", 0, 0, 0);
+                sistemaFacade.gestionarPilotos("consulta", piloto);
+            }
+            default -> msgError("Opción inválida.");
+        }
+    }
+
+    private static void mostrarPilotos() {
+        List<Piloto> pilotos = PilotoDAO.obtenerTodos(); // usa el método estático del DAO
+        linea();
+        titulo("  LISTA DE PILOTOS");
+        linea();
+        for (Piloto p : pilotos) {
+            System.out.println("ID: " + p.getId() +
+                    " | Nombre: " + p.getNombre() +
+                    " | Habilidad: " + p.getHabilidad() +
+                    " | Escudería: " + p.getEscuderiaId() +
+                    " | Auto: " + p.getAutoId());
+        }
+        linea();
+    }
+
+    private static void mostrarPiloto(Piloto piloto) {
+        linea();
+        titulo("  PILOTO REGISTRADO");
+        linea();
+        System.out.println("ID: " + piloto.getId() +
+                " | Nombre: " + piloto.getNombre() +
+                " | Habilidad: " + piloto.getHabilidad() +
+                " | Escudería: " + piloto.getEscuderiaId() +
+                " | Auto: " + piloto.getAutoId());
+        linea();
+    }
+    private static void mostrarEscuderias() {
+        List<Escuderia> escuderias = EscuderiaDAO.obtenerTodos(); // usa tu DAO de escuderías
+        linea();
+        titulo("  LISTA DE ESCUDERÍAS");
+        linea();
+        for (Escuderia e : escuderias) {
+            System.out.println("ID: " + e.getId() +
+                    " | Nombre: " + e.getNombre() +
+                    " | Color: " + e.getColor());
+        }
+        linea();
+    }
+
+    // ════════════════════════════════════════════════
+    // CU22 — Gestion Escuderias
+    // ════════════════════════════════════════════════
+    private static void cuGestionarEscuderias() {
+        // Similar a cuGestionarPilotos, pero usando EscuderiaDAO
+        linea();
+        titulo("  GESTIONAR ESCUDERÍAS (CU22)");
+        linea();
+        System.out.println("  [1] Alta de escudería");
+        System.out.println("  [2] Baja de escudería");
+        System.out.println("  [3] Modificar escudería");
+        System.out.println("  [4] Consultar escudería");
+        System.out.print("  Opción: ");
+        String opcion = sc.nextLine().trim();
+
+        EscuderiaDAO escuderiaDAO = new EscuderiaDAO();
+
+        switch (opcion) {
+            case "1" -> {
+                System.out.print("Nombre: ");
+                String nombre = sc.nextLine();
+                Color color = PaletaColoresDemo.mostrarPicker();
+                Escuderia escuderia = new Escuderia(0, nombre, color);
+                escuderiaDAO.insertar(escuderia);
+
+                System.out.println("Escudería registrada: " + nombre);
+            }
+            case "2" -> {
+                mostrarEscuderias();
+                System.out.print("ID de escudería a eliminar: ");
+                int id = Integer.parseInt(sc.nextLine());
+                escuderiaDAO.eliminar(id);
+                System.out.println("Escudería eliminada.");
+            }
+            case "3" -> {
+                mostrarEscuderias();
+                System.out.print("ID de escudería a modificar: ");
+                int id = Integer.parseInt(sc.nextLine());
+                System.out.print("Nuevo nombre: ");
+                String nombre = sc.nextLine();
+                System.out.print("Nuevo color (hex #RRGGBB): ");
+                String colorHex = sc.nextLine().trim();
+
+                try {
+                    Escuderia escuderia = new Escuderia(id, nombre, javafx.scene.paint.Color.web(colorHex));
+                    escuderiaDAO.actualizar(escuderia); // usar actualizar, no insertar
+                    System.out.println("✅ Escudería actualizada.");
+                } catch (IllegalArgumentException e) {
+                    System.out.println("⚠ Color inválido. Debe ser en formato #RRGGBB (ej: #FF0000).");
+                }
+            }
+
+            case "4" -> {
+                mostrarEscuderias();
+            }
+            default -> msgError("Opción inválida.");
+        }
     }
 
     // ════════════════════════════════════════════════

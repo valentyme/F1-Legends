@@ -37,11 +37,6 @@ public class SistemaCarreraFacade {
     }
 
     // ── CU09 ─────────────────────────────────────────
-    /**
-     * Busca el piloto, lo guarda en la configuración y — sólo si el
-     * jugadorPrincipal ya fue registrado — crea el Participante principal.
-     * De esta forma nunca se genera un Participante con piloto o jugador nulo.
-     */
     public void seleccionarPiloto(int pilotoId) {
         Piloto piloto = pilotoService.seleccionarPiloto(pilotoId);
         configuracionCarrera.setPilotoSeleccionado(piloto);
@@ -53,16 +48,11 @@ public class SistemaCarreraFacade {
                     List.of(new Participante(jugadorPrincipal, piloto))
             );
         }
-        // Si jugadorPrincipal aún es null (nunca debería pasar con el flujo corregido
-        // del Main) simplemente no armamos participantes aquí; el Main lo hará
-        // explícitamente después.
+
     }
 
     // ── CU10 ─────────────────────────────────────────
-    /**
-     * Agrega los participantes adicionales (multijugador) a los ya existentes.
-     * No reemplaza la lista completa para no perder al jugador principal.
-     */
+
     public void seleccionarParticipantes(List<Integer> idsUsuarios, List<Integer> idsPilotos) {
         ParticipanteService participanteService = new ParticipanteService();
         List<Participante> adicionales = participanteService.crearParticipantes(idsUsuarios, idsPilotos);
@@ -85,7 +75,12 @@ public class SistemaCarreraFacade {
     }
 
     // ── Admin ─────────────────────────────────────────
-    public void gestionarPilotos(Piloto piloto)               { /* CU21 */ }
+
+    // ── CU21 ─────────────────────────────────────────
+    public void gestionarPilotos(String operacion, Piloto piloto) {
+        pilotoService.gestionarPilotos(operacion, piloto);
+    }
+
     public void gestionarEscuderias(Escuderia escuderia)       { /* CU22 */ }
     public void administrarConfiguraciones(ConfiguracionCarrera c) { this.configuracionCarrera = c; }
 
