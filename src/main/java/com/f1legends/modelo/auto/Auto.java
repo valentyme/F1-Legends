@@ -14,6 +14,9 @@ public class Auto {
     private double variacionMomento;
     private int ticksHastaProximaVariacion;
 
+    /** Multiplicador aplicado por la estrategia de conducción del piloto (1.0 = sin efecto). */
+    private double factorEstrategia = 1.0;
+
     public Auto(int id, String modelo, double velocidadBase, Escuderia escuderia) {
         this.id = id;
         this.modelo = modelo;
@@ -29,7 +32,7 @@ public class Auto {
     public void avanzar(double deltaTiempo) {
         actualizarVariacionMomento();
 
-        double velocidadReal = velocidadBase * factorAleatorio * variacionMomento;
+        double velocidadReal = velocidadBase * factorAleatorio * variacionMomento * factorEstrategia;
         progreso += velocidadReal * deltaTiempo;
 
         while (progreso >= 1.0) {
@@ -55,8 +58,11 @@ public class Auto {
     public double getFactorAleatorio() { return factorAleatorio; }
 
     public double getVelocidadEfectiva() {
-        return velocidadBase * factorAleatorio * variacionMomento;
+        return velocidadBase * factorAleatorio * variacionMomento * factorEstrategia;
     }
+
+    public double getFactorEstrategia() { return factorEstrategia; }
+    public void setFactorEstrategia(double factorEstrategia) { this.factorEstrategia = factorEstrategia; }
 
     public void setModelo(String modelo) { this.modelo = modelo; }
     public void setVelocidadBase(double velocidadBase) { this.velocidadBase = velocidadBase; }

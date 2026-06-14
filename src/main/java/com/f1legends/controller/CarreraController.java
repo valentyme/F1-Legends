@@ -506,8 +506,31 @@ public class CarreraController {
                     velocidad,
                     esc
             );
+
+            // Aplicar el efecto de la estrategia de conducción del piloto (Strategy).
+            double condicionesPista = obtenerCondicionesPista(carrera.getClimaInicial());
+            double rendimientoBase = p.getPiloto().getHabilidad() * condicionesPista;
+            double rendimientoConEstrategia = p.getPiloto().calcularRendimiento(condicionesPista);
+            if (rendimientoBase > 0) {
+                auto.setFactorEstrategia(rendimientoConEstrategia / rendimientoBase);
+            }
+
             carrera.agregarAuto(auto);
         }
+    }
+
+    /**
+     * Traduce el clima inicial de la carrera a un factor de condiciones
+     * de pista usado por las estrategias de conducción (Strategy):
+     * climas adversos penalizan más a estrategias agresivas.
+     */
+    private double obtenerCondicionesPista(String clima) {
+        if (clima == null) return 1.0;
+        return switch (clima) {
+            case "Lluvioso" -> 0.7;
+            case "Nublado"  -> 0.9;
+            default         -> 1.0; // Soleado u otro
+        };
     }
 
     public void simularVueltas(Carrera carrera) {
