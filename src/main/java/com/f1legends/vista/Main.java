@@ -5,6 +5,7 @@ import com.f1legends.DAO.modeloDAO.CircuitoDAO;
 import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;
+import com.f1legends.controller.AutoController;
 import com.f1legends.controller.CarreraController;
 import com.f1legends.controller.EscuderiaController;
 import com.f1legends.controller.PilotoController;
@@ -14,6 +15,7 @@ import com.f1legends.controller.UsuarioController;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Usuario;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
+import com.f1legends.servicios.AutoService;
 
 import java.util.Scanner;
 
@@ -120,6 +122,7 @@ public class Main {
         System.out.println("  [3] Listar todos los usuarios");
         System.out.println("  [4] Gestionar pilotos        (CU21)");
         System.out.println("  [5] Gestionar escuderías (CU22)");
+        System.out.println("  [6] Gestionar autos          (Factory Auto)");
         System.out.println("  [0] Cerrar sesión            (CU07)");
         linea();
         System.out.print("  Opción: ");
@@ -129,6 +132,7 @@ public class Main {
             case "3"  -> usuarioController.listarUsuarios();
             case "4"  -> new PilotoController(new SistemaCarreraFacade(), autoDAO, sc).cuGestionarPilotos();
             case "5"  -> new EscuderiaController(new SistemaCarreraFacade(), escuderiaDAO, sc).cuGestionarEscuderias();
+            case "6"  -> new AutoController(new AutoService(), escuderiaDAO, sc).cuGestionarAutos();
             case "0"  -> usuarioController.cuCerrarSesion();
             default   -> msgError("Opción inválida.");
         }

@@ -20,7 +20,8 @@ import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.factory.FabricaAuto;
 import com.f1legends.patrones.factory.TipoAuto;
-import com.f1legends.patrones.fabricaEscuderia.FabricaEscuderia;
+import com.f1legends.patrones.observer.EstadisticaObserver;
+import com.f1legends.patrones.observer.VistaCarreraObserver;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -434,6 +435,9 @@ public class CarreraController {
         subtitulo("SIMULANDO CARRERA");
         mostrarCabeceraCarrera(carrera);
 
+        carrera.agregarObservador(new VistaCarreraObserver());
+        carrera.agregarObservador(new EstadisticaObserver());
+
         prepararAutosBase(carrera);
         prepararAutosParticipantes(carrera, facade);
 
@@ -454,25 +458,18 @@ public class CarreraController {
 
     public void prepararAutosBase(Carrera carrera) {
         FabricaAuto fabricaAuto = new FabricaAuto();
-        FabricaEscuderia fabricaEscuderia = new FabricaEscuderia();
+        List<Auto> autosPersistidos = fabricaAuto.obtenerAutos();
 
-        Auto ferrari  = fabricaAuto.crearAuto(TipoAuto.FERRARI);
-        ferrari.setEscuderia(fabricaEscuderia.crearEscuderia(1));
+        if (!autosPersistidos.isEmpty()) {
+            autosPersistidos.forEach(carrera::agregarAuto);
+            msgOk("Autos cargados desde SQLite: " + autosPersistidos.size());
+            return;
+        }
 
-        Auto mercedes = fabricaAuto.crearAuto(TipoAuto.MERCEDES);
-        mercedes.setEscuderia(fabricaEscuderia.crearEscuderia(2));
-
-        Auto redbull  = fabricaAuto.crearAuto(TipoAuto.RED_BULL);
-        redbull.setEscuderia(fabricaEscuderia.crearEscuderia(3));
-
-        Auto mclaren  = new Auto(4, "MCL60", 0.052, fabricaEscuderia.crearEscuderia(4));
-        Auto alpine   = new Auto(5, "A524",  0.050, fabricaEscuderia.crearEscuderia(5));
-
-        carrera.agregarAuto(ferrari);
-        carrera.agregarAuto(mercedes);
-        carrera.agregarAuto(redbull);
-        carrera.agregarAuto(mclaren);
-        carrera.agregarAuto(alpine);
+        carrera.agregarAuto(fabricaAuto.crearAuto(TipoAuto.FERRARI));
+        carrera.agregarAuto(fabricaAuto.crearAuto(TipoAuto.MERCEDES));
+        carrera.agregarAuto(fabricaAuto.crearAuto(TipoAuto.RED_BULL));
+        msgOk("No habia autos en la BD. Se cargo una grilla base por Factory.");
     }
 
     public void prepararAutosParticipantes(Carrera carrera, SistemaCarreraFacade facade) {

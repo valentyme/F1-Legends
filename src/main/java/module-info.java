@@ -9,7 +9,9 @@ module com.f1legends {
     exports com.f1legends.DAO;
     exports com.f1legends.DAO.modeloDAO;
     exports com.f1legends.patrones.estado;
+    exports com.f1legends.patrones.observer;
     exports com.f1legends.patrones.factory;
+    exports com.f1legends.patrones.facade;
     exports com.f1legends.modelo.circuitos;
     exports com.f1legends.modelo.Escuderias;
     exports com.f1legends.modelo.Usuarios;
