@@ -103,6 +103,11 @@ public class Auto {
         tiempoDetenido = 0;
     }
 
+    // Si el auto está detenido por alguna razón (accidente, etc.)
+    public boolean estaDetenido() {
+        return tiempoDetenido > 0;  // el nombre exacto del campo depende de tu implementación
+    }
+
     public void aumentarDesgaste(double cantidad) {
         desgasteNeumaticos = Math.min(100, desgasteNeumaticos + cantidad);
     }
