@@ -1,28 +1,43 @@
 package com.f1legends.DAO.modeloDAO;
 
 import com.f1legends.DAO.ConexionBD;
+import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.auto.Auto;
-import java.sql.*;
+import com.f1legends.patrones.factory.FabricaAuto;
+import com.f1legends.patrones.factory.TipoAuto;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AutoDAO {
+    private final EscuderiaDAO escuderiaDAO = new EscuderiaDAO();
 
-    // Alta de auto
-    public void insertar(Auto auto) {
-        String sql = "INSERT INTO Autos (modelo, velocidad_base, escuderia_id) VALUES (?, ?, ?)";
+    public int insertar(Auto auto) {
+        String sql = "INSERT INTO Autos (modelo, velocidad_base, escuderia_id, tipo_auto) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConexionBD.conectar();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, auto.getModelo());
             pstmt.setDouble(2, auto.getVelocidadBase());
-            pstmt.setInt(3, auto.getEscuderia().getId()); // FK hacia escudería
+            pstmt.setInt(3, obtenerEscuderiaId(auto));
+            pstmt.setString(4, auto.getTipoAuto().name());
             pstmt.executeUpdate();
+
+            try (ResultSet keys = pstmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudo insertar el auto.", e);
         }
+        return 0;
     }
 
-    // Baja de auto
     public void eliminar(int id) {
         String sql = "DELETE FROM Autos WHERE id = ?";
         try (Connection conn = ConexionBD.conectar();
@@ -30,87 +45,105 @@ public class AutoDAO {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudo eliminar el auto.", e);
         }
     }
 
-    // Modificación de auto
     public void actualizar(Auto auto) {
-        String sql = "UPDATE Autos SET modelo = ?, velocidad_base = ?, escuderia_id = ? WHERE id = ?";
+        String sql = "UPDATE Autos SET modelo = ?, velocidad_base = ?, escuderia_id = ?, tipo_auto = ? WHERE id = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, auto.getModelo());
             pstmt.setDouble(2, auto.getVelocidadBase());
-            pstmt.setInt(3, auto.getEscuderia().getId());
-            pstmt.setInt(4, auto.getId());
+            pstmt.setInt(3, obtenerEscuderiaId(auto));
+            pstmt.setString(4, auto.getTipoAuto().name());
+            pstmt.setInt(5, auto.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudo actualizar el auto.", e);
         }
     }
 
-    // Consulta por ID
     public Auto obtenerPorId(int id) {
-        String sql = "SELECT id, modelo, velocidad_base, escuderia_id FROM Autos WHERE id = ?";
+        String sql = "SELECT id, modelo, velocidad_base, escuderia_id, tipo_auto FROM Autos WHERE id = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return new Auto(
-                        rs.getInt("id"),
-                        rs.getString("modelo"),
-                        rs.getDouble("velocidad_base"),
-                        // acá deberías recuperar la escudería con EscuderiaDAO
-                        null
-                );
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearAuto(rs);
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudo obtener el auto.", e);
         }
         return null;
     }
 
-    // Listar todos
     public List<Auto> obtenerTodos() {
         List<Auto> lista = new ArrayList<>();
-        String sql = "SELECT id, modelo, velocidad_base, escuderia_id FROM Autos";
+        String sql = "SELECT id, modelo, velocidad_base, escuderia_id, tipo_auto FROM Autos";
         try (Connection conn = ConexionBD.conectar();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                lista.add(new Auto(
-                        rs.getInt("id"),
-                        rs.getString("modelo"),
-                        rs.getDouble("velocidad_base"),
-                        // recuperar escudería con EscuderiaDAO
-                        null
-                ));
+                lista.add(mapearAuto(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudieron listar los autos.", e);
         }
         return lista;
     }
+
     public Auto obtenerPorEscuderiaId(int escuderiaId) {
-        String sql = "SELECT id, modelo, velocidad_base, escuderia_id FROM Autos WHERE escuderia_id = ?";
+        List<Auto> autos = obtenerTodosPorEscuderiaId(escuderiaId);
+        return autos.isEmpty() ? null : autos.get(0);
+    }
+
+    public List<Auto> obtenerTodosPorEscuderiaId(int escuderiaId) {
+        List<Auto> lista = new ArrayList<>();
+        String sql = "SELECT id, modelo, velocidad_base, escuderia_id, tipo_auto FROM Autos WHERE escuderia_id = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, escuderiaId);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return new Auto(
-                        rs.getInt("id"),
-                        rs.getString("modelo"),
-                        rs.getDouble("velocidad_base"),
-                        null // acá podrías usar EscuderiaDAO para traer la escudería completa
-                );
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearAuto(rs));
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudieron obtener los autos de la escuderia.", e);
         }
-        return null;
+        return lista;
     }
 
+    public void eliminarPorEscuderiaId(int escuderiaId) {
+        String sql = "DELETE FROM Autos WHERE escuderia_id = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, escuderiaId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("No se pudieron eliminar los autos de la escuderia.", e);
+        }
+    }
 
+    private Auto mapearAuto(ResultSet rs) throws SQLException {
+        Escuderia escuderia = escuderiaDAO.obtenerPorId(rs.getInt("escuderia_id"));
+        TipoAuto tipoAuto = TipoAuto.valueOf(rs.getString("tipo_auto"));
+        return new FabricaAuto(this, escuderiaDAO).crearAuto(
+                tipoAuto,
+                rs.getInt("id"),
+                rs.getString("modelo"),
+                rs.getDouble("velocidad_base"),
+                escuderia
+        );
+    }
+
+    private int obtenerEscuderiaId(Auto auto) {
+        if (auto.getEscuderia() == null) {
+            throw new IllegalArgumentException("El auto debe tener una escuderia asignada.");
+        }
+        return auto.getEscuderia().getId();
+    }
 }

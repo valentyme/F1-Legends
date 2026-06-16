@@ -4,9 +4,11 @@ import com.f1legends.modelo.*;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
+import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.circuitos.Circuito;
 import com.f1legends.patrones.estrategias.EstrategiaConduccion;
+import com.f1legends.patrones.factory.TipoAuto;
 import com.f1legends.servicios.*;
 
 import java.util.List;
@@ -19,6 +21,7 @@ public class SistemaCarreraFacade {
     private CircuitoService      circuitoService;
     private ModoJuegoService     modoJuegoService;
     private ParticipanteService  participanteService;
+    private AutoService          autoService;
 
     public SistemaCarreraFacade() {
         this.pilotoService       = new PilotoService();
@@ -26,6 +29,7 @@ public class SistemaCarreraFacade {
         this.circuitoService     = new CircuitoService();
         this.modoJuegoService    = new ModoJuegoService();
         this.participanteService = new ParticipanteService();
+        this.autoService         = new AutoService();
         this.configuracionCarrera = new ConfiguracionCarrera();
     }
 
@@ -99,6 +103,23 @@ public class SistemaCarreraFacade {
 
     public List<Escuderia> consultarEscuderias() {
         return escuderiaService.consultarEscuderias();
+    }
+
+    // Gestion de autos - Factory Auto + DAO
+    public Auto altaAuto(String modelo, double velocidadBase, int escuderiaId, TipoAuto tipoAuto) {
+        return autoService.altaAuto(modelo, velocidadBase, escuderiaId, tipoAuto);
+    }
+
+    public void bajaAuto(int id) {
+        autoService.bajaAuto(id);
+    }
+
+    public void modificarAuto(int id, String modelo, double velocidadBase, int escuderiaId, TipoAuto tipoAuto) {
+        autoService.modificarAuto(id, modelo, velocidadBase, escuderiaId, tipoAuto);
+    }
+
+    public List<Auto> consultarAutos() {
+        return autoService.consultarAutos();
     }
 
     // ── CUXX ─────────────────────────────────────────

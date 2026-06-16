@@ -30,14 +30,16 @@ public class App extends Application {
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         FabricaAuto fabricaAuto = new FabricaAuto();
-        Auto ferrari = fabricaAuto.crearAuto(TipoAuto.FERRARI);
-        Auto mercedes = fabricaAuto.crearAuto(TipoAuto.MERCEDES);
-        Auto redbull = fabricaAuto.crearAuto(TipoAuto.RED_BULL);
-
+        Escuderia ferrariEsc = new Escuderia(1, "Ferrari", Color.RED);
+        Escuderia mercedesEsc = new Escuderia(2, "Mercedes", Color.SILVER);
+        Escuderia redBullEsc = new Escuderia(3, "Red Bull", Color.DARKBLUE);
         Escuderia mclarenEsc = new Escuderia(4, "McLaren", Color.ORANGE);
         Escuderia alpineEsc = new Escuderia(5, "Alpine", Color.DEEPSKYBLUE);
-        Auto mclaren = new Auto(4, "MCL60", 0.052, mclarenEsc);
-        Auto alpine = new Auto(5, "A524", 0.050, alpineEsc);
+        Auto ferrari = fabricaAuto.crearAuto(TipoAuto.REGLAMENTO_2024, 1, "SF-24", 0.055, ferrariEsc);
+        Auto mercedes = fabricaAuto.crearAuto(TipoAuto.REGLAMENTO_2024, 2, "W15", 0.051, mercedesEsc);
+        Auto redbull = fabricaAuto.crearAuto(TipoAuto.REGLAMENTO_2024, 3, "RB20", 0.058, redBullEsc);
+        Auto mclaren = fabricaAuto.crearAuto(TipoAuto.REGLAMENTO_2024, 4, "MCL60", 0.052, mclarenEsc);
+        Auto alpine = fabricaAuto.crearAuto(TipoAuto.REGLAMENTO_2024, 5, "A524", 0.050, alpineEsc);
 
         Carrera carrera = new Carrera(1, new CircuitoSpa(), "08/06/2026", 3, "Soleado");
         carrera.agregarAuto(ferrari);

@@ -1,37 +1,63 @@
 package com.f1legends.utiles;
 
-import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
-public class PaletaColoresDemo extends Application {
-    // Variable estática para guardar el color elegido
-    public static Color colorElegido;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
-    @Override
-    public void start(Stage stage) {
-        ColorPicker picker = new ColorPicker(Color.RED);
+public class PaletaColoresDemo {
 
-        picker.setOnAction(e -> {
-            colorElegido = picker.getValue(); // guarda el color
-            stage.close(); // cierra la ventana
+    private static boolean inicializado = false;
+
+    private static void inicializarJavaFX() {
+        if (!inicializado) {
+            Platform.startup(() -> {});
+            inicializado = true;
+        }
+    }
+
+    public static Color mostrarPicker() {
+        inicializarJavaFX();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Color> colorSeleccionado =
+                new AtomicReference<>(Color.GRAY);
+
+        Platform.runLater(() -> {
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            ColorPicker picker = new ColorPicker(Color.RED);
+
+            picker.setOnAction(e -> {
+                colorSeleccionado.set(picker.getValue());
+                stage.close();
+            });
+
+            stage.setOnHidden(e -> latch.countDown());
+
+            VBox root = new VBox(10);
+            root.getChildren().add(picker);
+
+            Scene scene = new Scene(root, 250, 100);
+
+            stage.setTitle("Seleccionar color para escudería");
+            stage.setScene(scene);
+            stage.show();
         });
 
-        VBox root = new VBox(picker);
-        Scene scene = new Scene(root, 200, 100);
-        stage.setScene(scene);
-        stage.setTitle("Seleccionar color para escudería");
-        stage.show();
-    }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
-    // Este método lanza la aplicación JavaFX y devuelve el color elegido
-    public static Color mostrarPicker() {
-        // Lanza JavaFX (solo puede llamarse una vez por ejecución)
-        Application.launch(PaletaColoresDemo.class);
-        return colorElegido != null ? colorElegido : Color.GRAY; // valor por defecto si no se elige nada
+        return colorSeleccionado.get();
     }
 }
-

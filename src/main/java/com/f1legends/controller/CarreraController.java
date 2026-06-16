@@ -1,10 +1,10 @@
 package com.f1legends.controller;
 
+import com.f1legends.DAO.modeloDAO.AutoDAO;
 import com.f1legends.DAO.modeloDAO.CircuitoDAO;
 import com.f1legends.DAO.modeloDAO.CircuitoDTO;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;
-import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
@@ -18,15 +18,16 @@ import com.f1legends.patrones.estrategias.EstrategiaConduccion;
 import com.f1legends.patrones.estrategias.EstrategiaConservadora;
 import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
-import com.f1legends.patrones.factory.FabricaAuto;
-import com.f1legends.patrones.factory.TipoAuto;
-import com.f1legends.patrones.fabricaEscuderia.FabricaEscuderia;
-import javafx.scene.paint.Color;
+import com.f1legends.patrones.observer.EstadisticaObserver;
+import com.f1legends.patrones.observer.VistaCarreraObserver;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
 
 import static com.f1legends.vista.ConsoleUI.*;
 
@@ -39,6 +40,7 @@ public class CarreraController {
 
     private final UsuarioDAO usuarioDAO;
     private final CircuitoDAO circuitoDAO;
+    private final AutoDAO autoDAO;
     private final RankingController rankingController;
     private final Scanner sc;
 
@@ -46,6 +48,7 @@ public class CarreraController {
                              RankingController rankingController, Scanner sc) {
         this.usuarioDAO = usuarioDAO;
         this.circuitoDAO = circuitoDAO;
+        this.autoDAO = new AutoDAO();
         this.rankingController = rankingController;
         this.sc = sc;
     }
@@ -66,6 +69,8 @@ public class CarreraController {
             Piloto pilotoElegido = seleccionarPilotoSingleplayer(facade);
             if (pilotoElegido == null) return;
             seleccionarEstrategia(facade);
+            if (!seleccionarAutosParticipantes(facade)) return;
+            if (!completarGrillaConCpu(facade, 6)) return;
 
             CircuitoDTO dto = seleccionarCircuitoDTO();
             if (dto == null) return;
@@ -82,6 +87,8 @@ public class CarreraController {
             boolean ok = flujoMultijugador(facade, jugador);
             if (!ok) return;
             seleccionarEstrategia(facade);
+            if (!seleccionarAutosParticipantes(facade)) return;
+            if (!completarGrillaConCpu(facade, 6)) return;
 
             CircuitoDTO dto = seleccionarCircuitoDTO();
             if (dto == null) return;
@@ -296,9 +303,138 @@ public class CarreraController {
         }
     }
 
+    public boolean seleccionarAutosParticipantes(SistemaCarreraFacade facade) {
+        List<Participante> participantes = facade.getConfiguracionCarrera().getParticipantes();
+        if (participantes == null || participantes.isEmpty()) {
+            msgError("No hay participantes para seleccionar autos.");
+            return false;
+        }
+
+        subtitulo("SELECCIONAR AUTO");
+        for (Participante participante : participantes) {
+            if (participante == null || participante.getJugador() == null || participante.getPiloto() == null) {
+                msgError("Hay un participante incompleto. No se puede seleccionar auto.");
+                return false;
+            }
+
+            Auto auto = seleccionarAutoParaPiloto(participante.getPiloto(), participante.getJugador());
+            if (auto == null) {
+                return false;
+            }
+
+            participante.setAuto(copiarAutoParaCarrera(
+                    auto,
+                    participante.getJugador().getId(),
+                    participante.getPiloto().getNombre()
+            ));
+            msgOk(participante.getJugador().getUsername() + " corre con " + auto.getModelo()
+                    + " - " + auto.getTipoAuto());
+        }
+        return true;
+    }
+
+    private Auto seleccionarAutoParaPiloto(Piloto piloto, Jugador jugador) {
+        List<Auto> autos = autoDAO.obtenerTodosPorEscuderiaId(piloto.getEscuderiaId());
+        if (autos.isEmpty()) {
+            msgError("La escuderia del piloto " + piloto.getNombre() + " no tiene autos cargados.");
+            return null;
+        }
+
+        System.out.println("\n  " + jugador.getUsername() + " - Piloto: " + piloto.getNombre());
+        System.out.println("  AUTOS DISPONIBLES:");
+        for (int i = 0; i < autos.size(); i++) {
+            Auto auto = autos.get(i);
+            System.out.printf("  [%d] %-20s %-18s Velocidad: %.3f%n",
+                    i + 1,
+                    auto.getModelo(),
+                    auto.getTipoAuto(),
+                    auto.getVelocidadBase());
+        }
+
+        System.out.print("  Selecciona el auto: ");
+        try {
+            int opcion = Integer.parseInt(sc.nextLine().trim());
+            if (opcion < 1 || opcion > autos.size()) {
+                msgError("No existe un auto con esa opcion.");
+                return null;
+            }
+            return autos.get(opcion - 1);
+        } catch (NumberFormatException e) {
+            msgError("Opcion invalida.");
+            return null;
+        }
+    }
+
     // ════════════════════════════════════════════════
     // MULTIJUGADOR
     // ════════════════════════════════════════════════
+    public boolean completarGrillaConCpu(SistemaCarreraFacade facade, int minimoParticipantes) {
+        List<Participante> participantes = facade.getConfiguracionCarrera().getParticipantes();
+        if (participantes == null) {
+            msgError("No hay participantes para completar la grilla.");
+            return false;
+        }
+
+        Set<Integer> pilotosElegidos = new HashSet<>();
+        for (Participante participante : participantes) {
+            if (participante != null && participante.getPiloto() != null) {
+                pilotosElegidos.add(participante.getPiloto().getId());
+            }
+        }
+
+        List<Piloto> candidatos = PilotoDAO.obtenerTodos().stream()
+                .filter(piloto -> !pilotosElegidos.contains(piloto.getId()))
+                .toList();
+
+        int cpuId = -1;
+        for (Piloto pilotoCpu : candidatos) {
+            if (participantes.size() >= minimoParticipantes) {
+                break;
+            }
+
+            Auto autoCpu = elegirAutoCpu(pilotoCpu, cpuId);
+            if (autoCpu == null) {
+                continue;
+            }
+
+            Jugador jugadorCpu = new Jugador(cpuId, "CPU - " + pilotoCpu.getNombre(), "", "CPU");
+            participantes.add(new Participante(jugadorCpu, pilotoCpu, autoCpu));
+            pilotosElegidos.add(pilotoCpu.getId());
+            cpuId--;
+        }
+
+        if (participantes.size() < 2) {
+            msgError("No hay suficientes pilotos con autos cargados para disputar una carrera.");
+            return false;
+        }
+
+        if (participantes.size() < minimoParticipantes) {
+            msgError("La grilla tiene solo " + participantes.size()
+                    + " participantes. Carga mas pilotos/autos para una carrera completa.");
+            return false;
+        }
+
+        msgOk("Rivales CPU cargados desde SQLite. Grilla: " + participantes.size() + " autos.");
+        return true;
+    }
+
+    private Auto elegirAutoCpu(Piloto piloto, int idCarrera) {
+        return autoDAO.obtenerTodosPorEscuderiaId(piloto.getEscuderiaId()).stream()
+                .max(Comparator.comparingDouble(Auto::getVelocidadBase))
+                .map(auto -> copiarAutoParaCarrera(auto, idCarrera, piloto.getNombre()))
+                .orElse(null);
+    }
+
+    private Auto copiarAutoParaCarrera(Auto auto, int idCarrera, String pilotoNombre) {
+        return new Auto(
+                idCarrera,
+                pilotoNombre + " / " + auto.getModelo(),
+                auto.getVelocidadBase(),
+                auto.getEscuderia(),
+                auto.getTipoAuto()
+        );
+    }
+
     public boolean flujoMultijugador(SistemaCarreraFacade facade, Jugador jugadorPrincipal) {
         subtitulo("MODO MULTIJUGADOR LOCAL");
 
@@ -434,14 +570,18 @@ public class CarreraController {
         subtitulo("SIMULANDO CARRERA");
         mostrarCabeceraCarrera(carrera);
 
-        prepararAutosBase(carrera);
-        prepararAutosParticipantes(carrera, facade);
+        carrera.agregarObservador(new VistaCarreraObserver());
+        carrera.agregarObservador(new EstadisticaObserver());
+
+        if (!prepararAutosParticipantes(carrera, facade)) {
+            return;
+        }
 
         carrera.iniciar();
         System.out.println("  Semáforo apagado... luces encendidas... ¡VERDE!\n");
 
         simularVueltas(carrera);
-        mostrarResultados(carrera, jugador);
+        mostrarResultados(carrera, jugador, facade);
     }
 
     public void mostrarCabeceraCarrera(Carrera carrera) {
@@ -452,75 +592,50 @@ public class CarreraController {
         linea();
     }
 
-    public void prepararAutosBase(Carrera carrera) {
-        FabricaAuto fabricaAuto = new FabricaAuto();
-        FabricaEscuderia fabricaEscuderia = new FabricaEscuderia();
-
-        Auto ferrari  = fabricaAuto.crearAuto(TipoAuto.FERRARI);
-        ferrari.setEscuderia(fabricaEscuderia.crearEscuderia(1));
-
-        Auto mercedes = fabricaAuto.crearAuto(TipoAuto.MERCEDES);
-        mercedes.setEscuderia(fabricaEscuderia.crearEscuderia(2));
-
-        Auto redbull  = fabricaAuto.crearAuto(TipoAuto.RED_BULL);
-        redbull.setEscuderia(fabricaEscuderia.crearEscuderia(3));
-
-        Auto mclaren  = new Auto(4, "MCL60", 0.052, fabricaEscuderia.crearEscuderia(4));
-        Auto alpine   = new Auto(5, "A524",  0.050, fabricaEscuderia.crearEscuderia(5));
-
-        carrera.agregarAuto(ferrari);
-        carrera.agregarAuto(mercedes);
-        carrera.agregarAuto(redbull);
-        carrera.agregarAuto(mclaren);
-        carrera.agregarAuto(alpine);
-    }
-
-    public void prepararAutosParticipantes(Carrera carrera, SistemaCarreraFacade facade) {
+    public boolean prepararAutosParticipantes(Carrera carrera, SistemaCarreraFacade facade) {
         List<Participante> participantes = facade.getConfiguracionCarrera().getParticipantes();
 
         if (participantes == null || participantes.isEmpty()) {
             msgError("No hay participantes registrados en la carrera.");
-            return;
+            return false;
         }
 
         for (Participante p : participantes) {
             if (p == null) {
                 msgError("Se encontró un participante nulo; se omite.");
-                continue;
+                return false;
             }
             if (p.getJugador() == null) {
                 msgError("Participante sin jugador asignado; se omite.");
-                continue;
+                return false;
             }
             if (p.getPiloto() == null) {
                 msgError("Participante sin piloto asignado (jugador: "
                         + p.getJugador().getUsername() + "); se omite.");
-                continue;
+                return false;
+            }
+            if (p.getAuto() == null) {
+                msgError("Participante sin auto seleccionado (jugador: "
+                        + p.getJugador().getUsername() + ").");
+                return false;
             }
 
-            double velocidad = 0.046 + (p.getPiloto().getHabilidad() / 100.0) * 0.014;
-            Escuderia esc = new Escuderia(
-                    p.getJugador().getId(),
-                    p.getJugador().getUsername(),
-                    Color.BLUE
-            );
-            Auto auto = new Auto(
-                    p.getJugador().getId(),
-                    p.getPiloto().getNombre(),
-                    velocidad,
-                    esc
-            );
+            Auto auto = p.getAuto();
 
             // Aplicar el efecto de la estrategia de conducción del piloto (Strategy).
             double condicionesPista = obtenerCondicionesPista(carrera.getClimaInicial());
+            double factorHabilidad = 0.85 + (p.getPiloto().getHabilidad() / 100.0) * 0.30;
             double rendimientoBase = p.getPiloto().getHabilidad() * condicionesPista;
             double rendimientoConEstrategia = p.getPiloto().calcularRendimiento(condicionesPista);
             if (rendimientoBase > 0) {
-                auto.setFactorEstrategia(rendimientoConEstrategia / rendimientoBase);
+                auto.setFactorEstrategia(factorHabilidad * (rendimientoConEstrategia / rendimientoBase));
+            } else {
+                auto.setFactorEstrategia(factorHabilidad);
             }
 
             carrera.agregarAuto(auto);
         }
+        return true;
     }
 
     /**
@@ -558,8 +673,9 @@ public class CarreraController {
         }
     }
 
-    public void mostrarResultados(Carrera carrera, Jugador jugador) {
+    public void mostrarResultados(Carrera carrera, Jugador jugador, SistemaCarreraFacade facade) {
         List<Auto> posiciones = carrera.getPosiciones();
+        Auto autoJugador = obtenerAutoJugador(facade, jugador);
         linea();
         System.out.println("  *** BANDERA A CUADROS ***");
         linea();
@@ -572,7 +688,7 @@ public class CarreraController {
 
         for (int i = 0; i < posiciones.size(); i++) {
             Auto a = posiciones.get(i);
-            boolean esJugador = (a.getId() == jugador.getId());
+            boolean esJugador = autoJugador != null && a == autoJugador;
             String marca = esJugador ? " ← TÚ" : "";
             System.out.printf("  %-5s %-25s %d vueltas%s%n",
                     (i + 1) + "º", a.getModelo(), a.getVueltasCompletadas(), marca);
@@ -599,5 +715,18 @@ public class CarreraController {
         System.out.println();
         System.out.print("  Presioná ENTER para continuar...");
         sc.nextLine();
+    }
+
+    private Auto obtenerAutoJugador(SistemaCarreraFacade facade, Jugador jugador) {
+        List<Participante> participantes = facade.getConfiguracionCarrera().getParticipantes();
+        if (participantes == null) {
+            return null;
+        }
+
+        return participantes.stream()
+                .filter(p -> p.getJugador() != null && p.getJugador().getId() == jugador.getId())
+                .map(Participante::getAuto)
+                .findFirst()
+                .orElse(null);
     }
 }

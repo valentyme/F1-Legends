@@ -3,9 +3,10 @@ package com.f1legends.DAO;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ConexionBD {
-    private static final String URL = "jdbc:sqlite:BaseDeDatos/f1_legends.db";
+    private static final String URL = "jdbc:sqlite:f1_legends.db";
 
     static {
         try {
@@ -16,6 +17,10 @@ public class ConexionBD {
     }
 
     public static Connection conectar() throws SQLException {
-        return DriverManager.getConnection(URL);
+        Connection conn = DriverManager.getConnection(URL);
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON");
+        }
+        return conn;
     }
 }
