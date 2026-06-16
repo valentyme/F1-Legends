@@ -8,6 +8,7 @@ import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.modelo.circuitos.Circuito;
 import com.f1legends.patrones.estrategias.EstrategiaConduccion;
+import com.f1legends.patrones.factory.TipoAuto;
 import com.f1legends.servicios.*;
 
 import java.util.List;
@@ -105,16 +106,16 @@ public class SistemaCarreraFacade {
     }
 
     // Gestion de autos - Factory Auto + DAO
-    public Auto altaAuto(String modelo, double velocidadBase, int escuderiaId) {
-        return autoService.altaAuto(modelo, velocidadBase, escuderiaId);
+    public Auto altaAuto(String modelo, double velocidadBase, int escuderiaId, TipoAuto tipoAuto) {
+        return autoService.altaAuto(modelo, velocidadBase, escuderiaId, tipoAuto);
     }
 
     public void bajaAuto(int id) {
         autoService.bajaAuto(id);
     }
 
-    public void modificarAuto(int id, String modelo, double velocidadBase, int escuderiaId) {
-        autoService.modificarAuto(id, modelo, velocidadBase, escuderiaId);
+    public void modificarAuto(int id, String modelo, double velocidadBase, int escuderiaId, TipoAuto tipoAuto) {
+        autoService.modificarAuto(id, modelo, velocidadBase, escuderiaId, tipoAuto);
     }
 
     public List<Auto> consultarAutos() {

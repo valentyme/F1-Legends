@@ -3,6 +3,8 @@ package com.f1legends.DAO.modeloDAO;
 import com.f1legends.DAO.ConexionBD;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.auto.Auto;
+import com.f1legends.patrones.factory.FabricaAuto;
+import com.f1legends.patrones.factory.TipoAuto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,12 +18,13 @@ public class AutoDAO {
     private final EscuderiaDAO escuderiaDAO = new EscuderiaDAO();
 
     public int insertar(Auto auto) {
-        String sql = "INSERT INTO Autos (modelo, velocidad_base, escuderia_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Autos (modelo, velocidad_base, escuderia_id, tipo_auto) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, auto.getModelo());
             pstmt.setDouble(2, auto.getVelocidadBase());
             pstmt.setInt(3, obtenerEscuderiaId(auto));
+            pstmt.setString(4, auto.getTipoAuto().name());
             pstmt.executeUpdate();
 
             try (ResultSet keys = pstmt.getGeneratedKeys()) {
@@ -47,13 +50,14 @@ public class AutoDAO {
     }
 
     public void actualizar(Auto auto) {
-        String sql = "UPDATE Autos SET modelo = ?, velocidad_base = ?, escuderia_id = ? WHERE id = ?";
+        String sql = "UPDATE Autos SET modelo = ?, velocidad_base = ?, escuderia_id = ?, tipo_auto = ? WHERE id = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, auto.getModelo());
             pstmt.setDouble(2, auto.getVelocidadBase());
             pstmt.setInt(3, obtenerEscuderiaId(auto));
-            pstmt.setInt(4, auto.getId());
+            pstmt.setString(4, auto.getTipoAuto().name());
+            pstmt.setInt(5, auto.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalStateException("No se pudo actualizar el auto.", e);
@@ -61,7 +65,7 @@ public class AutoDAO {
     }
 
     public Auto obtenerPorId(int id) {
-        String sql = "SELECT id, modelo, velocidad_base, escuderia_id FROM Autos WHERE id = ?";
+        String sql = "SELECT id, modelo, velocidad_base, escuderia_id, tipo_auto FROM Autos WHERE id = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
@@ -78,7 +82,7 @@ public class AutoDAO {
 
     public List<Auto> obtenerTodos() {
         List<Auto> lista = new ArrayList<>();
-        String sql = "SELECT id, modelo, velocidad_base, escuderia_id FROM Autos";
+        String sql = "SELECT id, modelo, velocidad_base, escuderia_id, tipo_auto FROM Autos";
         try (Connection conn = ConexionBD.conectar();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -98,7 +102,7 @@ public class AutoDAO {
 
     public List<Auto> obtenerTodosPorEscuderiaId(int escuderiaId) {
         List<Auto> lista = new ArrayList<>();
-        String sql = "SELECT id, modelo, velocidad_base, escuderia_id FROM Autos WHERE escuderia_id = ?";
+        String sql = "SELECT id, modelo, velocidad_base, escuderia_id, tipo_auto FROM Autos WHERE escuderia_id = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, escuderiaId);
@@ -126,7 +130,9 @@ public class AutoDAO {
 
     private Auto mapearAuto(ResultSet rs) throws SQLException {
         Escuderia escuderia = escuderiaDAO.obtenerPorId(rs.getInt("escuderia_id"));
-        return new Auto(
+        TipoAuto tipoAuto = TipoAuto.valueOf(rs.getString("tipo_auto"));
+        return new FabricaAuto(this, escuderiaDAO).crearAuto(
+                tipoAuto,
                 rs.getInt("id"),
                 rs.getString("modelo"),
                 rs.getDouble("velocidad_base"),

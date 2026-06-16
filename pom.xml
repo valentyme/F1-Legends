@@ -53,6 +53,10 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.f1legends.vista.Main</mainClass>
+                    <options>
+                        <option>--enable-native-access=org.xerial.sqlitejdbc,javafx.graphics</option>
+                        <option>--sun-misc-unsafe-memory-access=allow</option>
+                    </options>
                 </configuration>
             </plugin>
 

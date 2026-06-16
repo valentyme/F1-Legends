@@ -4,9 +4,9 @@ import com.f1legends.DAO.modeloDAO.AutoDAO;
 import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.auto.Auto;
-import com.f1legends.modelo.auto.AutoFerrari;
-import com.f1legends.modelo.auto.AutoMercedes;
-import com.f1legends.modelo.auto.AutoRedBull;
+import com.f1legends.modelo.auto.AutoReglamento2022;
+import com.f1legends.modelo.auto.AutoReglamento2023;
+import com.f1legends.modelo.auto.AutoReglamento2024;
 
 import java.util.List;
 
@@ -23,31 +23,18 @@ public class FabricaAuto {
         this.escuderiaDAO = escuderiaDAO;
     }
 
-    public Auto crearAuto(TipoAuto tipoAuto) {
-        Auto autoPersistido = obtenerAutoPersistido(tipoAuto);
-        if (autoPersistido != null) {
-            return autoPersistido;
-        }
-
-        return switch (tipoAuto) {
-            case FERRARI -> new AutoFerrari();
-            case MERCEDES -> new AutoMercedes();
-            case RED_BULL -> new AutoRedBull();
-        };
-    }
-
-    public Auto crearAuto(String modelo, double velocidadBase, int escuderiaId) {
+    public Auto crearAuto(TipoAuto tipoAuto, String modelo, double velocidadBase, int escuderiaId) {
         Escuderia escuderia = escuderiaDAO.obtenerPorId(escuderiaId);
         if (escuderia == null) {
             throw new IllegalArgumentException("No existe una escuderia con ID " + escuderiaId + ".");
         }
-        return new Auto(0, modelo, velocidadBase, escuderia);
+        return crearAuto(tipoAuto, 0, modelo, velocidadBase, escuderia);
     }
 
-    public Auto crearAutoPersistido(String modelo, double velocidadBase, int escuderiaId) {
-        Auto auto = crearAuto(modelo, velocidadBase, escuderiaId);
+    public Auto crearAutoPersistido(TipoAuto tipoAuto, String modelo, double velocidadBase, int escuderiaId) {
+        Auto auto = crearAuto(tipoAuto, modelo, velocidadBase, escuderiaId);
         int id = autoDAO.insertar(auto);
-        return new Auto(id, auto.getModelo(), auto.getVelocidadBase(), auto.getEscuderia());
+        return crearAuto(tipoAuto, id, auto.getModelo(), auto.getVelocidadBase(), auto.getEscuderia());
     }
 
     public Auto obtenerAuto(int id) {
@@ -66,11 +53,11 @@ public class FabricaAuto {
         autoDAO.eliminar(id);
     }
 
-    private Auto obtenerAutoPersistido(TipoAuto tipoAuto) {
+    public Auto crearAuto(TipoAuto tipoAuto, int id, String modelo, double velocidadBase, Escuderia escuderia) {
         return switch (tipoAuto) {
-            case FERRARI -> autoDAO.obtenerPorEscuderiaId(1);
-            case MERCEDES -> autoDAO.obtenerPorEscuderiaId(2);
-            case RED_BULL -> autoDAO.obtenerPorEscuderiaId(3);
+            case REGLAMENTO_2022 -> new AutoReglamento2022(id, modelo, velocidadBase, escuderia);
+            case REGLAMENTO_2023 -> new AutoReglamento2023(id, modelo, velocidadBase, escuderia);
+            case REGLAMENTO_2024 -> new AutoReglamento2024(id, modelo, velocidadBase, escuderia);
         };
     }
 }
