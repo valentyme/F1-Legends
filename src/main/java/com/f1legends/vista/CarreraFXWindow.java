@@ -1,15 +1,21 @@
 package com.f1legends.vista;
+import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
+import com.f1legends.controller.RankingController;
+import com.f1legends.modelo.Usuarios.Jugador;
+import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -33,8 +39,12 @@ public class CarreraFXWindow {
     private static final int ANCHO_CANVAS = 950;
     private static final int ALTO_CANVAS  = 650;
     private static final int ANCHO_PANEL  = 260;
+    private static final int[] TABLA_PUNTOS = {25, 18, 15, 12, 10};
 
     private final Carrera carrera;
+    private final Jugador jugador;
+    private final List<Participante> participantes;
+    private final RankingController rankingController;
 
     // Latch para que el hilo que llama pueda esperar a que cierre la ventana
     private final CountDownLatch latch = new CountDownLatch(1);
@@ -46,9 +56,20 @@ public class CarreraFXWindow {
     //Para mostrar eventos visualmente
     private final List<EventoVisual> eventosVisuales = new ArrayList<>();
     private final Object lockEventos = new Object();
+    private boolean resultadosMostrados;
 
     public CarreraFXWindow(Carrera carrera) {
+        this(carrera, null, List.of(), new RankingController(new RankingGlobalDAO()));
+    }
+
+    public CarreraFXWindow(Carrera carrera, Jugador jugador, List<Participante> participantes,
+                           RankingController rankingController) {
         this.carrera = carrera;
+        this.jugador = jugador;
+        this.participantes = participantes == null ? List.of() : participantes;
+        this.rankingController = rankingController == null
+                ? new RankingController(new RankingGlobalDAO())
+                : rankingController;
     }
 
     /**
@@ -273,6 +294,7 @@ public class CarreraFXWindow {
                         stage.setTitle(stage.getTitle() + " — FINALIZADA ✓");
                         btnPausar.setDisable(true);
                         btnReanudar.setDisable(true);
+                        mostrarResultados(stage);
                         latch.countDown();
                     });
                 }
@@ -311,26 +333,34 @@ public class CarreraFXWindow {
         // Autos eliminados: no se dibujan
         if (auto.isFueraCarrera()) return;
 
-        var pos = carrera.getCircuito().calcularPosicion(auto.getProgreso());
-
         // Color base del auto
         Color colorBase = auto.getEscuderia().getColor();
 
-        // Si está detenido en boxes: color atenuado + ícono pit
-        boolean enBoxes = auto.estaDetenido(); // necesitás este getter (ver abajo)
+        boolean enBoxes = auto.isEnBoxes();
+        double x;
+        double y;
+        if (enBoxes) {
+            double[] posBoxes = posicionBoxes(auto, carrera);
+            x = posBoxes[0];
+            y = posBoxes[1];
+        } else {
+            var pos = carrera.getCircuito().calcularPosicion(auto.getProgreso());
+            x = pos.x;
+            y = pos.y;
+        }
 
-        gc.setFill(enBoxes ? colorBase.darker().darker() : colorBase);
-        gc.fillOval(pos.x - 9, pos.y - 9, 18, 18);
+        gc.setFill(auto.estaDetenido() ? colorBase.darker().darker() : colorBase);
+        gc.fillOval(x - 9, y - 9, 18, 18);
 
-        gc.setStroke(enBoxes ? Color.YELLOW : Color.WHITE);
-        gc.setLineWidth(enBoxes ? 2.5 : 1.5);
-        gc.strokeOval(pos.x - 9, pos.y - 9, 18, 18);
+        gc.setStroke(auto.estaDetenido() ? Color.YELLOW : Color.WHITE);
+        gc.setLineWidth(auto.estaDetenido() ? 2.5 : 1.5);
+        gc.strokeOval(x - 9, y - 9, 18, 18);
 
         // Ícono de boxes encima
         if (enBoxes) {
             gc.setFill(Color.YELLOW);
             gc.setFont(javafx.scene.text.Font.font(11));
-            gc.fillText("🔧", pos.x - 6, pos.y - 12);
+            gc.fillText("🔧", x - 6, y - 12);
         }
 
         // Nombre
@@ -339,7 +369,15 @@ public class CarreraFXWindow {
         String etiqueta = auto.getModelo().contains(" / ")
                 ? auto.getModelo().split(" / ")[0]
                 : auto.getModelo();
-        gc.fillText(etiqueta, pos.x + 11, pos.y + 4);
+        gc.fillText(etiqueta, x + 11, y + 4);
+    }
+
+    private double[] posicionBoxes(Auto auto, Carrera carrera) {
+        double duracion = Math.max(0.1, auto.getDuracionDetencion());
+        double avance = 1.0 - Math.max(0, auto.getTiempoDetenido()) / duracion;
+        double t = Math.max(0.0, Math.min(1.0, avance));
+        var punto = carrera.getCircuito().calcularPosicionPitLane(Math.min(0.90, t));
+        return new double[]{punto.x, punto.y};
     }
 
     private void dibujarEventoVisual(GraphicsContext gc, EventoVisual ev) {
@@ -397,9 +435,16 @@ public class CarreraFXWindow {
 
         if (tipoVisual == null) return;
 
-        // Posición en canvas: apilados verticalmente para que no se pisen
         double baseY = 60 + (eventosVisuales.size() % 5) * 46.0;
-        double cx    = ANCHO_CANVAS / 2.0;
+        double cx = ANCHO_CANVAS / 2.0;
+        if (tipoVisual == EventoVisual.Tipo.BOXES) {
+            Auto auto = buscarAutoEvento(descripcion, c);
+            if (auto != null) {
+                double[] posBoxes = posicionBoxes(auto, c);
+                cx = posBoxes[0] + 80;
+                baseY = posBoxes[1] - 42;
+            }
+        }
 
         double duracion = switch (tipoVisual) {
             case ACCIDENTE   -> 4.0;
@@ -408,6 +453,109 @@ public class CarreraFXWindow {
         };
 
         eventosVisuales.add(new EventoVisual(tipoVisual, descripcion, cx, baseY, duracion));
+    }
+
+    private Auto buscarAutoEvento(String descripcion, Carrera c) {
+        return c.getAutos().stream()
+                .filter(auto -> descripcion.contains(auto.getModelo()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void mostrarResultados(Stage owner) {
+        if (resultadosMostrados) {
+            return;
+        }
+        resultadosMostrados = true;
+
+        List<Auto> posiciones = carrera.getPosiciones();
+        Auto autoJugador = obtenerAutoJugador();
+        int posicionJugador = -1;
+        int puntosGanados = 0;
+
+        for (int i = 0; i < posiciones.size(); i++) {
+            if (autoJugador != null && posiciones.get(i) == autoJugador) {
+                posicionJugador = i + 1;
+                puntosGanados = i < TABLA_PUNTOS.length ? TABLA_PUNTOS[i] : 1;
+                break;
+            }
+        }
+
+        int puntosTotales = puntosGanados;
+        if (jugador != null && puntosGanados > 0) {
+            rankingController.sumarPuntos(jugador.getId(), puntosGanados);
+            puntosTotales = new RankingGlobalDAO().obtenerRankingGlobal().stream()
+                    .filter(entrada -> entrada.usuarioId == jugador.getId())
+                    .mapToInt(entrada -> entrada.puntaje)
+                    .findFirst()
+                    .orElse(puntosGanados);
+        }
+
+        Stage resultados = new Stage();
+        resultados.initOwner(owner);
+        resultados.initModality(Modality.APPLICATION_MODAL);
+        resultados.setTitle("Resultados - F1 Legends");
+
+        VBox root = new VBox(14);
+        root.setPadding(new Insets(22));
+        root.setStyle("-fx-background-color: #090b0f; -fx-border-color: #ef1d26; -fx-border-width: 2;");
+
+        Label titulo = new Label("BANDERA A CUADROS");
+        titulo.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 26px; -fx-font-weight: 900; -fx-font-style: italic;");
+
+        Label resumen = new Label("Terminaste " + textoPosicion(posicionJugador)
+                + " | +" + puntosGanados + " pts | Total: " + puntosTotales + " pts");
+        resumen.setStyle("-fx-text-fill: #ef1d26; -fx-font-size: 16px; -fx-font-weight: 800;");
+
+        VBox podio = new VBox(8);
+        podio.getChildren().add(crearLineaPodio("PODIO", ""));
+        for (int i = 0; i < Math.min(3, posiciones.size()); i++) {
+            podio.getChildren().add(crearLineaPodio((i + 1) + "º", posiciones.get(i).getModelo()));
+        }
+
+        VBox tabla = new VBox(5);
+        tabla.getChildren().add(crearLineaPodio("CLASIFICACIÓN", ""));
+        for (int i = 0; i < posiciones.size(); i++) {
+            Auto auto = posiciones.get(i);
+            String marca = autoJugador != null && auto == autoJugador ? "  <- VOS" : "";
+            tabla.getChildren().add(crearLineaPodio((i + 1) + "º",
+                    auto.getModelo() + " - V" + auto.getVueltasCompletadas() + "/" + carrera.getVueltas() + marca));
+        }
+
+        Button cerrar = new Button("Cerrar");
+        cerrar.setStyle("-fx-background-color: #ef1d26; -fx-text-fill: white; -fx-font-weight: 800; -fx-padding: 10 18;");
+        cerrar.setOnAction(e -> resultados.close());
+
+        root.getChildren().addAll(titulo, resumen, podio, tabla, cerrar);
+        resultados.setScene(new Scene(root, 520, 520));
+        resultados.show();
+    }
+
+    private HBox crearLineaPodio(String posicion, String texto) {
+        Label pos = new Label(posicion);
+        pos.setMinWidth(110);
+        pos.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 900;");
+        Label detalle = new Label(texto);
+        detalle.setStyle("-fx-text-fill: #d8d8d8;");
+        HBox fila = new HBox(10, pos, detalle);
+        fila.setAlignment(Pos.CENTER_LEFT);
+        return fila;
+    }
+
+    private Auto obtenerAutoJugador() {
+        if (jugador == null) {
+            return null;
+        }
+        return participantes.stream()
+                .filter(participante -> participante.getJugador() != null
+                        && participante.getJugador().getId() == jugador.getId())
+                .map(Participante::getAuto)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String textoPosicion(int posicion) {
+        return posicion <= 0 ? "sin posición" : posicion + "º";
     }
 
     private String iconClima(String clima) {

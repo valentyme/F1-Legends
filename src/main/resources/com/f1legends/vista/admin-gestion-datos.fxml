@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.f1legends.vista.AdminGestionDatosController">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="top-bar">
+            <padding>
+                <Insets top="18" right="28" bottom="18" left="28" />
+            </padding>
+            <ImageView fitWidth="82" preserveRatio="true">
+                <image>
+                    <Image url="@assets/logo-f1-legends.png" />
+                </image>
+            </ImageView>
+            <VBox spacing="2">
+                <Label text="Administración" styleClass="section-kicker" />
+                <Label text="Pilotos, escuderías y autos" styleClass="screen-title" />
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Volver" onAction="#volver" styleClass="secondary-small-button" />
+        </HBox>
+    </top>
+    <center>
+        <VBox spacing="14" styleClass="content-area">
+            <padding>
+                <Insets top="24" right="28" bottom="28" left="28" />
+            </padding>
+            <TabPane styleClass="admin-tabs" VBox.vgrow="ALWAYS">
+                <tabs>
+                    <Tab text="Pilotos" closable="false">
+                        <BorderPane>
+                            <center>
+                                <TableView fx:id="pilotosTable" styleClass="data-table">
+                                    <columns>
+                                        <TableColumn fx:id="pilotoIdColumn" text="ID" prefWidth="70" />
+                                        <TableColumn fx:id="pilotoNombreColumn" text="NOMBRE" prefWidth="300" />
+                                        <TableColumn fx:id="pilotoHabilidadColumn" text="HABILIDAD" prefWidth="130" />
+                                        <TableColumn fx:id="pilotoEscuderiaColumn" text="ESCUDERÍA ID" prefWidth="150" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                </TableView>
+                            </center>
+                            <right>
+                                <VBox spacing="12" styleClass="side-form">
+                                    <Label text="Piloto" styleClass="card-title" />
+                                    <Label text="Nombre" styleClass="field-label" />
+                                    <TextField fx:id="pilotoNombreField" promptText="Nombre" />
+                                    <Label text="Habilidad" styleClass="field-label" />
+                                    <Spinner fx:id="pilotoHabilidadSpinner" editable="true" />
+                                    <Label text="Escudería" styleClass="field-label" />
+                                    <ComboBox fx:id="pilotoEscuderiaCombo" maxWidth="Infinity" />
+                                    <Button text="Guardar nuevo" onAction="#guardarPiloto" maxWidth="Infinity" styleClass="primary-button" />
+                                    <Button text="Modificar seleccionado" onAction="#modificarPiloto" maxWidth="Infinity" styleClass="secondary-button" />
+                                    <Button text="Eliminar seleccionado" onAction="#eliminarPiloto" maxWidth="Infinity" styleClass="danger-button" />
+                                </VBox>
+                            </right>
+                        </BorderPane>
+                    </Tab>
+                    <Tab text="Escuderías" closable="false">
+                        <BorderPane>
+                            <center>
+                                <TableView fx:id="escuderiasTable" styleClass="data-table">
+                                    <columns>
+                                        <TableColumn fx:id="escuderiaIdColumn" text="ID" prefWidth="80" />
+                                        <TableColumn fx:id="escuderiaNombreColumn" text="NOMBRE" prefWidth="340" />
+                                        <TableColumn fx:id="escuderiaColorColumn" text="COLOR" prefWidth="180" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                </TableView>
+                            </center>
+                            <right>
+                                <VBox spacing="12" styleClass="side-form">
+                                    <Label text="Escudería" styleClass="card-title" />
+                                    <Label text="Nombre" styleClass="field-label" />
+                                    <TextField fx:id="escuderiaNombreField" promptText="Nombre" />
+                                    <Label text="Color hex" styleClass="field-label" />
+                                    <TextField fx:id="escuderiaColorField" text="#E53935" promptText="#RRGGBB" />
+                                    <Button text="Guardar nueva" onAction="#guardarEscuderia" maxWidth="Infinity" styleClass="primary-button" />
+                                    <Button text="Modificar seleccionada" onAction="#modificarEscuderia" maxWidth="Infinity" styleClass="secondary-button" />
+                                    <Button text="Eliminar seleccionada" onAction="#eliminarEscuderia" maxWidth="Infinity" styleClass="danger-button" />
+                                </VBox>
+                            </right>
+                        </BorderPane>
+                    </Tab>
+                    <Tab text="Autos" closable="false">
+                        <BorderPane>
+                            <center>
+                                <TableView fx:id="autosTable" styleClass="data-table">
+                                    <columns>
+                                        <TableColumn fx:id="autoIdColumn" text="ID" prefWidth="70" />
+                                        <TableColumn fx:id="autoModeloColumn" text="MODELO" prefWidth="240" />
+                                        <TableColumn fx:id="autoVelocidadColumn" text="VELOCIDAD" prefWidth="130" />
+                                        <TableColumn fx:id="autoTipoColumn" text="REGLAMENTO" prefWidth="170" />
+                                        <TableColumn fx:id="autoEscuderiaColumn" text="ESCUDERÍA" prefWidth="180" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                </TableView>
+                            </center>
+                            <right>
+                                <VBox spacing="12" styleClass="side-form">
+                                    <Label text="Auto" styleClass="card-title" />
+                                    <Label text="Modelo" styleClass="field-label" />
+                                    <TextField fx:id="autoModeloField" promptText="Modelo" />
+                                    <Label text="Velocidad base" styleClass="field-label" />
+                                    <TextField fx:id="autoVelocidadField" promptText="0.055" />
+                                    <Label text="Escudería" styleClass="field-label" />
+                                    <ComboBox fx:id="autoEscuderiaCombo" maxWidth="Infinity" />
+                                    <Label text="Reglamento" styleClass="field-label" />
+                                    <ComboBox fx:id="autoTipoCombo" maxWidth="Infinity" />
+                                    <Button text="Guardar nuevo" onAction="#guardarAuto" maxWidth="Infinity" styleClass="primary-button" />
+                                    <Button text="Modificar seleccionado" onAction="#modificarAuto" maxWidth="Infinity" styleClass="secondary-button" />
+                                    <Button text="Eliminar seleccionado" onAction="#eliminarAuto" maxWidth="Infinity" styleClass="danger-button" />
+                                </VBox>
+                            </right>
+                        </BorderPane>
+                    </Tab>
+                </tabs>
+            </TabPane>
+            <Label fx:id="estadoLabel" styleClass="status-strip" />
+        </VBox>
+    </center>
+</BorderPane>

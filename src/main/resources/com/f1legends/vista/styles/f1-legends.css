@@ -1,0 +1,302 @@
+.app-root {
+    -fx-background-color: #07090c;
+    -fx-font-family: "Arial";
+}
+
+.brand-panel {
+    -fx-background-color: linear-gradient(to bottom right, #050608, #101318);
+    -fx-min-width: 430;
+    -fx-pref-width: 470;
+    -fx-border-color: transparent #2a2d33 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.auth-area,
+.content-area {
+    -fx-background-color: #090b0f;
+}
+
+.top-bar {
+    -fx-background-color: #07090c;
+    -fx-border-color: transparent transparent #2a2d33 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.hero-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 44;
+    -fx-font-weight: 900;
+    -fx-font-style: italic;
+}
+
+.hero-copy {
+    -fx-text-fill: #d8d8d8;
+    -fx-font-size: 18;
+    -fx-line-spacing: 2;
+    -fx-max-width: 350;
+}
+
+.section-kicker {
+    -fx-text-fill: #ef1d26;
+    -fx-font-size: 15;
+    -fx-font-weight: 900;
+    -fx-font-style: italic;
+}
+
+.screen-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 34;
+    -fx-font-weight: 900;
+    -fx-font-style: italic;
+}
+
+.content-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24;
+    -fx-font-weight: 800;
+}
+
+.muted-text {
+    -fx-text-fill: #aeb4bd;
+    -fx-font-size: 14;
+}
+
+.panel-card {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 22;
+    -fx-pref-width: 260;
+}
+
+.card-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 20;
+    -fx-font-weight: 800;
+}
+
+.text-field,
+.password-field,
+.choice-box {
+    -fx-background-color: #07090c;
+    -fx-border-color: #3a3f48;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #8c929c;
+    -fx-pref-height: 42;
+}
+
+.combo-box,
+.spinner {
+    -fx-background-color: #07090c;
+    -fx-border-color: #3a3f48;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-pref-height: 42;
+}
+
+.combo-box > .list-cell,
+.spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #ffffff;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #101318;
+    -fx-border-color: #ef1d26;
+    -fx-border-width: 1;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #101318;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 10 12;
+}
+
+.combo-box-popup .list-view .list-cell:hover,
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #7c1b20;
+    -fx-text-fill: #ffffff;
+}
+
+.choice-box > .label {
+    -fx-text-fill: #ffffff;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.action-tile {
+    -fx-cursor: hand;
+    -fx-font-weight: 800;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
+
+.primary-button {
+    -fx-background-color: #ef1d26;
+    -fx-text-fill: #ffffff;
+    -fx-pref-height: 44;
+}
+
+.secondary-button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #111111;
+    -fx-pref-height: 44;
+}
+
+.secondary-small-button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #111111;
+    -fx-font-weight: 800;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 10 16;
+}
+
+.danger-button {
+    -fx-background-color: #7c1b20;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 800;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 12 18;
+    -fx-cursor: hand;
+}
+
+.ghost-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #ef1d26;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 10 16;
+}
+
+.action-tile {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18;
+    -fx-pref-width: 250;
+    -fx-pref-height: 110;
+}
+
+.action-tile:hover {
+    -fx-border-color: #ef1d26;
+}
+
+.danger-tile {
+    -fx-border-color: #7c1b20;
+}
+
+.message-label {
+    -fx-font-size: 13;
+}
+
+.message-error {
+    -fx-text-fill: #ff6b6b;
+}
+
+.message-ok {
+    -fx-text-fill: #8ee99a;
+}
+
+.status-strip {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #d8d8d8;
+    -fx-padding: 12 14;
+}
+
+.wide-panel {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 24;
+    -fx-max-width: 620;
+}
+
+.side-form {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 18;
+    -fx-pref-width: 280;
+}
+
+.admin-tabs {
+    -fx-background-color: transparent;
+}
+
+.admin-tabs .tab-header-area .tab-header-background {
+    -fx-background-color: #07090c;
+}
+
+.admin-tabs .tab {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-border-width: 1 1 0 1;
+}
+
+.admin-tabs .tab:selected {
+    -fx-background-color: #7c1b20;
+}
+
+.admin-tabs .tab-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 800;
+}
+
+.field-label {
+    -fx-text-fill: #d8d8d8;
+    -fx-font-size: 13;
+    -fx-font-weight: 800;
+}
+
+.data-table {
+    -fx-background-color: #101318;
+    -fx-border-color: #353941;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.data-table .column-header-background,
+.data-table .filler {
+    -fx-background-color: #07090c;
+}
+
+.data-table .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #353941 transparent;
+}
+
+.data-table .column-header .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 900;
+}
+
+.data-table .table-row-cell {
+    -fx-background-color: #101318;
+    -fx-border-color: transparent transparent #23272f transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+.data-table .table-row-cell:selected {
+    -fx-background-color: #7c1b20;
+}
+
+.data-table .table-cell {
+    -fx-text-fill: #f2f2f2;
+    -fx-padding: 12;
+}

@@ -13,6 +13,8 @@ public class Auto {
     private int vueltasCompletadas;
     private boolean fueraCarrera;
     private double tiempoDetenido;
+    private double duracionDetencion;
+    private boolean enBoxes;
     private double desgasteNeumaticos;
 
     private final double factorAleatorio;
@@ -45,6 +47,10 @@ public class Auto {
         }
         if (tiempoDetenido > 0) {
             tiempoDetenido = Math.max(0, tiempoDetenido - deltaTiempo);
+            if (tiempoDetenido == 0) {
+                enBoxes = false;
+                duracionDetencion = 0;
+            }
             return;
         }
 
@@ -77,6 +83,8 @@ public class Auto {
     public double getFactorAleatorio() { return factorAleatorio; }
     public boolean isFueraCarrera() { return fueraCarrera; }
     public double getTiempoDetenido() { return tiempoDetenido; }
+    public double getDuracionDetencion() { return duracionDetencion; }
+    public boolean isEnBoxes() { return enBoxes; }
     public double getDesgasteNeumaticos() { return desgasteNeumaticos; }
 
     public double getVelocidadEfectiva() {
@@ -95,12 +103,24 @@ public class Auto {
     public void detener(double segundos) {
         if (!fueraCarrera) {
             tiempoDetenido = Math.max(tiempoDetenido, segundos);
+            duracionDetencion = Math.max(duracionDetencion, segundos);
+            enBoxes = false;
+        }
+    }
+
+    public void entrarABoxes(double segundos) {
+        if (!fueraCarrera) {
+            tiempoDetenido = Math.max(tiempoDetenido, segundos);
+            duracionDetencion = Math.max(duracionDetencion, segundos);
+            enBoxes = true;
         }
     }
 
     public void retirar() {
         fueraCarrera = true;
         tiempoDetenido = 0;
+        duracionDetencion = 0;
+        enBoxes = false;
     }
 
     // Si el auto está detenido por alguna razón (accidente, etc.)

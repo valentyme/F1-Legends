@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.f1legends.vista.PerfilJugadorController">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="top-bar">
+            <padding>
+                <Insets top="18" right="28" bottom="18" left="28" />
+            </padding>
+            <ImageView fitWidth="82" preserveRatio="true">
+                <image>
+                    <Image url="@assets/logo-f1-legends.png" />
+                </image>
+            </ImageView>
+            <VBox spacing="2">
+                <Label text="Mi perfil" styleClass="section-kicker" />
+                <Label fx:id="usuarioActualLabel" styleClass="screen-title" />
+                <Label fx:id="fechaRegistroLabel" styleClass="muted-text" />
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Volver" onAction="#volver" styleClass="secondary-small-button" />
+        </HBox>
+    </top>
+    <center>
+        <VBox spacing="18" styleClass="content-area">
+            <padding>
+                <Insets top="32" right="32" bottom="32" left="32" />
+            </padding>
+            <VBox spacing="16" styleClass="wide-panel">
+                <Label text="Datos de acceso" styleClass="content-title" />
+                <Label text="Usuario" styleClass="field-label" />
+                <TextField fx:id="usernameField" promptText="Usuario" maxWidth="420" />
+                <Label text="Nueva contraseña" styleClass="field-label" />
+                <PasswordField fx:id="passwordField" promptText="Dejá vacío para conservar la actual" maxWidth="420" />
+                <HBox spacing="12">
+                    <Button text="Guardar cambios" onAction="#guardarCambios" styleClass="primary-button" />
+                    <Button text="Eliminar cuenta" onAction="#eliminarCuenta" styleClass="danger-button" />
+                </HBox>
+                <Label fx:id="estadoLabel" minHeight="34" styleClass="message-label" />
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

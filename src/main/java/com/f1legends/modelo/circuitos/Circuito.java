@@ -23,4 +23,8 @@ public abstract class Circuito {
     // Métodos abstractos: cada circuito define su trazado y posiciones
     public abstract void dibujar(javafx.scene.canvas.GraphicsContext gc);
     public abstract Punto calcularPosicion(double progreso);
+
+    public Punto calcularPosicionPitLane(double progreso) {
+        return calcularPosicion(0.96);
+    }
 }

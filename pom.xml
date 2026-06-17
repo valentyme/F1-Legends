@@ -21,6 +21,11 @@
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
         <!-- JUnit 5 -->
         <dependency>
@@ -52,7 +57,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.f1legends.vista.Main</mainClass>
+                    <mainClass>com.f1legends.vista.MainFX</mainClass>
                     <options>
                         <option>--enable-native-access=org.xerial.sqlitejdbc,javafx.graphics</option>
                         <option>--sun-misc-unsafe-memory-access=allow</option>

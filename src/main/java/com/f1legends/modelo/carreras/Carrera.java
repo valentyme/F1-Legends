@@ -197,7 +197,7 @@ public class Carrera implements ObservableCarrera {
             case "Lluvioso" -> 2.0 + random.nextDouble() * 2.0;
             default -> 1.4 + random.nextDouble() * 1.6;
         };
-        auto.detener(demora);
+        auto.entrarABoxes(demora);
         auto.reducirDesgaste(65);
         notificarEvento("BOXES", auto.getModelo() + " entra a boxes (" + String.format("%.1f", demora) + "s)");
     }
@@ -213,20 +213,11 @@ public class Carrera implements ObservableCarrera {
         int indice = random.nextInt(posiciones.size() - 1);
         Auto primero = posiciones.get(indice);
         Auto segundo = posiciones.get(indice + 1);
-        boolean accidenteGrave = random.nextDouble() < ("Lluvioso".equals(climaActual) ? 0.12 : 0.05);
 
-        if (accidenteGrave) {
-            primero.retirar();
-            segundo.retirar();
-            notificarEvento("ACCIDENTE", "Colision entre " + primero.getModelo()
-                    + " y " + segundo.getModelo() + ": ambos quedan fuera");
-        } else {
-            double demora = 4.0 + random.nextDouble() * 4.0;
-            primero.detener(demora);
-            segundo.detener(demora * 0.8);
-            notificarEvento("ACCIDENTE", "Toque entre " + primero.getModelo()
-                    + " y " + segundo.getModelo() + ": pierden tiempo");
-        }
+        primero.retirar();
+        segundo.retirar();
+        notificarEvento("ACCIDENTE", "Colision entre " + primero.getModelo()
+                + " y " + segundo.getModelo() + ": ambos abandonan la carrera");
     }
 
     private void cambiarClimaAleatorio() {
