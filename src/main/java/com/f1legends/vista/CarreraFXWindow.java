@@ -321,9 +321,13 @@ public class CarreraFXWindow {
                     cortarNombre(a.getModelo(), 22),
                     a.getVueltasCompletadas(),
                     carrera.getVueltas(),
-                    estado));
+                    estado + " " + textoRueda(a)));
         }
         return sb.toString();
+    }
+
+    private String textoRueda(Auto auto) {
+        return auto.getTipoRuedaActual() == null ? "" : "[" + auto.getTipoRuedaActual().getNombre() + "]";
     }
 
     private String cortarNombre(String nombre, int max) {
