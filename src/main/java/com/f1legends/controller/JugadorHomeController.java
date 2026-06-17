@@ -1,7 +1,7 @@
-package com.f1legends.vista;
+package com.f1legends.controller;
 
-import com.f1legends.controller.Sesion;
 import com.f1legends.modelo.Usuarios.Jugador;
+import com.f1legends.vista.FxRouter;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
@@ -33,6 +33,11 @@ public class JugadorHomeController {
     @FXML
     private void abrirPrepararCarrera() throws IOException {
         FxRouter.showPrepararCarrera();
+    }
+
+    @FXML
+    private void abrirMultijugador() throws IOException {
+        FxRouter.showPrepararMultijugador();
     }
 
     @FXML

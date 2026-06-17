@@ -294,7 +294,8 @@ public class CarreraFXWindow {
                         stage.setTitle(stage.getTitle() + " — FINALIZADA ✓");
                         btnPausar.setDisable(true);
                         btnReanudar.setDisable(true);
-                        mostrarResultados(stage);
+                        mostrarResultados(owner);
+                        stage.close();
                         latch.countDown();
                     });
                 }
@@ -492,7 +493,9 @@ public class CarreraFXWindow {
         }
 
         Stage resultados = new Stage();
-        resultados.initOwner(owner);
+        if (owner != null) {
+            resultados.initOwner(owner);
+        }
         resultados.initModality(Modality.APPLICATION_MODAL);
         resultados.setTitle("Resultados - F1 Legends");
 

@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="app-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.f1legends.vista.PrepararCarreraController">
+<BorderPane styleClass="app-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.f1legends.controller.PrepararCarreraController">
     <top>
         <HBox alignment="CENTER_LEFT" spacing="18" styleClass="top-bar">
             <padding>
@@ -40,20 +40,17 @@
             <VBox spacing="18" styleClass="wide-panel">
                 <Label text="Configuración" styleClass="content-title" />
                 <GridPane hgap="18" vgap="14">
-                    <Label text="Modo" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <ComboBox fx:id="modoCombo" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <Label text="Piloto" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <ComboBox fx:id="pilotoCombo" maxWidth="Infinity" prefWidth="300" GridPane.columnIndex="0" GridPane.rowIndex="1" />
 
-                    <Label text="Piloto" styleClass="field-label" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                    <ComboBox fx:id="pilotoCombo" maxWidth="Infinity" prefWidth="360" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label text="Circuito" styleClass="field-label" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <ComboBox fx:id="circuitoCombo" maxWidth="Infinity" prefWidth="360" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                     <Label text="Reglamentación" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                     <ComboBox fx:id="reglamentacionCombo" maxWidth="Infinity" prefWidth="300" GridPane.columnIndex="0" GridPane.rowIndex="3" />
 
                     <Label text="Auto" styleClass="field-label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     <ComboBox fx:id="autoCombo" maxWidth="Infinity" prefWidth="360" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-
-                    <Label text="Circuito" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                    <ComboBox fx:id="circuitoCombo" maxWidth="Infinity" prefWidth="300" GridPane.columnIndex="0" GridPane.rowIndex="5" />
 
                     <Label text="Estrategia" styleClass="field-label" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                     <ComboBox fx:id="estrategiaCombo" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="5" />

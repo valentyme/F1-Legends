@@ -1,8 +1,8 @@
-package com.f1legends.vista;
+package com.f1legends.controller;
 
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;
-import com.f1legends.controller.UsuarioController;
+import com.f1legends.vista.FxRouter;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;

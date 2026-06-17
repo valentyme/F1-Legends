@@ -1,10 +1,7 @@
-package com.f1legends.vista;
+package com.f1legends.controller;
 
 import com.f1legends.DAO.modeloDAO.AutoDAO;
 import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
-import com.f1legends.controller.AutoController;
-import com.f1legends.controller.EscuderiaController;
-import com.f1legends.controller.PilotoController;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.auto.Auto;
@@ -12,6 +9,7 @@ import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.factory.TipoAuto;
 import com.f1legends.servicios.AutoService;
 import com.f1legends.utiles.ColorUtil;
+import com.f1legends.vista.FxRouter;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;

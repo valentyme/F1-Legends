@@ -44,6 +44,11 @@ public final class FxRouter {
         setScene("/com/f1legends/vista/preparar-carrera.fxml", "F1 Legends - Preparar carrera");
     }
 
+    /** Navega a la pantalla de configuración de carrera Multijugador Local. */
+    public static void showPrepararMultijugador() throws IOException {
+        setScene("/com/f1legends/vista/preparar-multijugador.fxml", "F1 Legends - Multijugador Local");
+    }
+
     public static void showAdminUsuarios() throws IOException {
         setScene("/com/f1legends/vista/admin-usuarios.fxml", "F1 Legends - Usuarios");
     }

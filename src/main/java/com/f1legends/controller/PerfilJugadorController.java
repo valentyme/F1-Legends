@@ -1,10 +1,9 @@
-package com.f1legends.vista;
+package com.f1legends.controller;
 
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;
-import com.f1legends.controller.Sesion;
-import com.f1legends.controller.UsuarioController;
 import com.f1legends.modelo.Usuarios.Usuario;
+import com.f1legends.vista.FxRouter;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;

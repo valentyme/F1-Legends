@@ -1,4 +1,4 @@
-package com.f1legends.vista;
+package com.f1legends.controller;
 
 import com.f1legends.DAO.modeloDAO.AutoDAO;
 import com.f1legends.DAO.modeloDAO.CircuitoDAO;
@@ -6,9 +6,6 @@ import com.f1legends.DAO.modeloDAO.CircuitoDTO;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;
-import com.f1legends.controller.CarreraController;
-import com.f1legends.controller.RankingController;
-import com.f1legends.controller.Sesion;
 import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
@@ -20,6 +17,9 @@ import com.f1legends.patrones.estrategias.EstrategiaConservadora;
 import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.factory.TipoAuto;
+import com.f1legends.vista.CarreraFXWindow;
+import com.f1legends.vista.FxRouter;
+import com.f1legends.vista.MainFX;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -46,7 +46,6 @@ public class PrepararCarreraController {
             null
     );
 
-    @FXML private ComboBox<String> modoCombo;
     @FXML private ComboBox<Piloto> pilotoCombo;
     @FXML private ComboBox<TipoAuto> reglamentacionCombo;
     @FXML private ComboBox<Auto> autoCombo;
@@ -70,10 +69,6 @@ public class PrepararCarreraController {
         Auto auto = autoCombo.getValue();
         CircuitoDTO circuito = circuitoCombo.getValue();
 
-        if (!"Singleplayer".equals(modoCombo.getValue())) {
-            mostrarError("Por ahora la vista inicia carreras singleplayer. Multijugador queda para la próxima parte.");
-            return;
-        }
         if (piloto == null || auto == null || circuito == null) {
             mostrarError("Elegí piloto, reglamentación, auto y circuito para iniciar.");
             return;
@@ -132,9 +127,6 @@ public class PrepararCarreraController {
     }
 
     private void configurarCombos() {
-        modoCombo.getItems().setAll("Singleplayer", "Multijugador Local");
-        modoCombo.setValue("Singleplayer");
-
         estrategiaCombo.getItems().setAll("Agresiva", "Equilibrada", "Conservadora");
         estrategiaCombo.setValue("Equilibrada");
 
@@ -142,7 +134,6 @@ public class PrepararCarreraController {
         climaCombo.setValue("Soleado");
 
         vueltasSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 3));
-        modoCombo.setVisibleRowCount(4);
         pilotoCombo.setVisibleRowCount(8);
         reglamentacionCombo.setVisibleRowCount(4);
         autoCombo.setVisibleRowCount(8);
