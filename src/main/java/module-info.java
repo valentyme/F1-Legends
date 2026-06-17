@@ -1,6 +1,7 @@
 module com.f1legends {
     requires javafx.controls;
     requires javafx.graphics;
+    requires javafx.fxml;
     requires java.sql;
 
     exports com.f1legends.vista;
@@ -19,4 +20,7 @@ module com.f1legends {
     exports com.f1legends.modelo.auto;
     exports com.f1legends.utiles;
     exports com.f1legends.controller;
+
+    opens com.f1legends.vista to javafx.fxml;
+    opens com.f1legends.controller to javafx.fxml;
 }

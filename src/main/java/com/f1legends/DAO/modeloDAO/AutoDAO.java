@@ -45,6 +45,13 @@ public class AutoDAO {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         } catch (SQLException e) {
+            if (e.getMessage() != null && e.getMessage().contains("FOREIGN KEY constraint failed")) {
+                throw new IllegalStateException(
+                        "No se puede eliminar el auto porque hay pilotos asociados. "
+                                + "Primero modifica o elimina esos pilotos.",
+                        e
+                );
+            }
             throw new IllegalStateException("No se pudo eliminar el auto.", e);
         }
     }

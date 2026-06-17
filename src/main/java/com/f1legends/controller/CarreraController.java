@@ -19,7 +19,11 @@ import com.f1legends.patrones.estrategias.EstrategiaConservadora;
 import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
 import com.f1legends.patrones.observer.EstadisticaObserver;
-import com.f1legends.patrones.observer.VistaCarreraObserver;
+import com.f1legends.vista.CarreraFXWindow;
+import com.f1legends.vista.MainFX;
+import javafx.application.Platform;
+import java.util.concurrent.CountDownLatch;
+
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -560,6 +564,7 @@ public class CarreraController {
     // ════════════════════════════════════════════════
     // SIMULACIÓN DE CARRERA
     // ════════════════════════════════════════════════
+    /*
     public void simularCarrera(Jugador jugador, Carrera carrera, Piloto pilotoElegido, SistemaCarreraFacade facade) {
         if (carrera == null) {
             msgError("No se pudo iniciar la carrera.");
@@ -583,7 +588,46 @@ public class CarreraController {
         simularVueltas(carrera);
         mostrarResultados(carrera, jugador, facade);
     }
+    */
 
+    public void simularCarrera(Jugador jugador, Carrera carrera, Piloto pilotoElegido,
+                               SistemaCarreraFacade facade) {
+        if (carrera == null) { msgError("No se pudo iniciar la carrera."); return; }
+
+        linea();
+        subtitulo("INICIANDO CARRERA EN PANTALLA");
+        mostrarCabeceraCarrera(carrera);
+
+        // Agregar observers (el de estadísticas sigue funcionando igual)
+        carrera.agregarObservador(new EstadisticaObserver());
+
+        if (!prepararAutosParticipantes(carrera, facade)) return;
+
+        carrera.iniciar();
+        System.out.println("  Abriendo ventana JavaFX... ¡Buena carrera!\n");
+
+        // ── Abrir ventana JavaFX y esperar ────────────────────────────────────
+        CarreraFXWindow ventana = new CarreraFXWindow(carrera);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            ventana.mostrar(MainFX.primaryStage);
+            latch.countDown();
+        });
+
+        try {
+            // Esperar a que se abra (el mostrar() retorna inmediato)
+            latch.await();
+            // Esperar a que se cierre la ventana antes de mostrar resultados
+            ventana.esperarCierre();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
+        System.out.println("  Carrera finalizada. Calculando resultados...\n");
+        mostrarResultados(carrera, jugador, facade);
+    }
     public void mostrarCabeceraCarrera(Carrera carrera) {
         System.out.println("  *** CARRERA EN "
                 + carrera.getCircuito().getNombre().toUpperCase()

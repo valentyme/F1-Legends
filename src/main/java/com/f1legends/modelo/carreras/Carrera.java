@@ -1,5 +1,7 @@
 package com.f1legends.modelo.carreras;
 
+import com.f1legends.DAO.modeloDAO.TipoRuedaDAO;
+import com.f1legends.modelo.TipoRueda;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.circuitos.Circuito;
 import com.f1legends.patrones.estado.EstadoCarrera;
@@ -28,6 +30,7 @@ public class Carrera implements ObservableCarrera {
     private String climaActual;
     private int ticksDesdeEvento;
     private List<Integer> ordenAnterior;
+    private List<TipoRueda> tiposRueda;
 
     public Carrera(int id, Circuito circuito, String fecha, int vueltas, String climaInicial) {
         this.id = id;
@@ -41,6 +44,7 @@ public class Carrera implements ObservableCarrera {
         this.random = new Random();
         this.climaActual = climaInicial;
         this.ordenAnterior = new ArrayList<>();
+        this.tiposRueda = new TipoRuedaDAO().obtenerTodos();
     }
 
     public Carrera(ConfiguracionCarrera configuracionCarrera) {
@@ -55,6 +59,7 @@ public class Carrera implements ObservableCarrera {
         this.random = new Random();
         this.climaActual = climaInicial;
         this.ordenAnterior = new ArrayList<>();
+        this.tiposRueda = new TipoRuedaDAO().obtenerTodos();
     }
 
     public void iniciar() {
@@ -87,6 +92,9 @@ public class Carrera implements ObservableCarrera {
     }
 
     public void agregarAuto(Auto auto) {
+        if (auto.getTipoRuedaActual() == null) {
+            auto.setTipoRuedaActual(ruedaInicial());
+        }
         autos.add(auto);
         ordenAnterior = idsEnOrden();
         notificarEvento("AUTO_AGREGADO", "Auto agregado a la carrera: " + auto.getModelo());
@@ -144,7 +152,7 @@ public class Carrera implements ObservableCarrera {
 
     private void procesarEventosDinamicos() {
         ticksDesdeEvento++;
-        if (ticksDesdeEvento < 20) {
+        if (ticksDesdeEvento < 70) {
             return;
         }
         ticksDesdeEvento = 0;
@@ -161,7 +169,10 @@ public class Carrera implements ObservableCarrera {
         }
 
         for (Auto auto : activos) {
-            if (auto.getDesgasteNeumaticos() > 55 && random.nextDouble() < probabilidadBoxes(auto)) {
+            if (!auto.estaDetenido()
+                    && auto.getParadasBoxes() < 2
+                    && auto.getDesgasteNeumaticos() > 78
+                    && random.nextDouble() < probabilidadBoxes(auto)) {
                 entrarABoXes(auto);
             }
         }
@@ -173,11 +184,11 @@ public class Carrera implements ObservableCarrera {
 
     private double probabilidadBoxes(Auto auto) {
         double base = switch (climaActual) {
-            case "Lluvioso" -> 0.06;
-            case "Nublado" -> 0.08;
-            default -> 0.13;
+            case "Lluvioso" -> 0.018;
+            case "Nublado" -> 0.014;
+            default -> 0.010;
         };
-        return base + (auto.getDesgasteNeumaticos() / 1000.0);
+        return base + (auto.getDesgasteNeumaticos() / 6000.0);
     }
 
     private double probabilidadAccidente() {
@@ -193,13 +204,49 @@ public class Carrera implements ObservableCarrera {
     }
 
     private void entrarABoXes(Auto auto) {
+        TipoRueda ruedaNueva = elegirRuedaParaClima();
         double demora = switch (climaActual) {
             case "Lluvioso" -> 2.0 + random.nextDouble() * 2.0;
             default -> 1.4 + random.nextDouble() * 1.6;
         };
-        auto.detener(demora);
-        auto.reducirDesgaste(65);
-        notificarEvento("BOXES", auto.getModelo() + " entra a boxes (" + String.format("%.1f", demora) + "s)");
+        auto.setTipoRuedaActual(ruedaNueva);
+        auto.entrarABoxes(demora);
+        auto.reducirDesgaste(85);
+        notificarEvento("BOXES", auto.getModelo() + " entra a boxes por "
+                + nombreRueda(ruedaNueva) + " (" + String.format("%.1f", demora) + "s)");
+    }
+
+    private TipoRueda ruedaInicial() {
+        return tiposRueda.stream()
+                .filter(rueda -> "Media".equalsIgnoreCase(rueda.getNombre()))
+                .findFirst()
+                .orElse(tiposRueda.isEmpty() ? null : tiposRueda.get(0));
+    }
+
+    private TipoRueda elegirRuedaParaClima() {
+        if ("Lluvioso".equals(climaActual)) {
+            return tiposRueda.stream()
+                    .filter(rueda -> rueda.getNombre().equalsIgnoreCase("Intermedia")
+                            || rueda.getNombre().equalsIgnoreCase("Lluvia Extrema"))
+                    .findAny()
+                    .orElse(ruedaInicial());
+        }
+
+        return tiposRueda.stream()
+                .filter(rueda -> rueda.getNombre().equalsIgnoreCase("Blanda")
+                        || rueda.getNombre().equalsIgnoreCase("Media")
+                        || rueda.getNombre().equalsIgnoreCase("Dura"))
+                .skip(random.nextInt(Math.max(1, (int) tiposRueda.stream()
+                        .filter(rueda -> rueda.getNombre().equalsIgnoreCase("Blanda")
+                                || rueda.getNombre().equalsIgnoreCase("Media")
+                                || rueda.getNombre().equalsIgnoreCase("Dura"))
+                        .count())))
+                .findFirst()
+                .orElse(ruedaInicial());
+    }
+
+    private String nombreRueda(TipoRueda rueda) {
+        return rueda == null ? "rueda nueva" : rueda.getNombre();
     }
 
     private void generarAccidente(List<Auto> activos) {
@@ -213,20 +260,11 @@ public class Carrera implements ObservableCarrera {
         int indice = random.nextInt(posiciones.size() - 1);
         Auto primero = posiciones.get(indice);
         Auto segundo = posiciones.get(indice + 1);
-        boolean accidenteGrave = random.nextDouble() < ("Lluvioso".equals(climaActual) ? 0.12 : 0.05);
 
-        if (accidenteGrave) {
-            primero.retirar();
-            segundo.retirar();
-            notificarEvento("ACCIDENTE", "Colision entre " + primero.getModelo()
-                    + " y " + segundo.getModelo() + ": ambos quedan fuera");
-        } else {
-            double demora = 4.0 + random.nextDouble() * 4.0;
-            primero.detener(demora);
-            segundo.detener(demora * 0.8);
-            notificarEvento("ACCIDENTE", "Toque entre " + primero.getModelo()
-                    + " y " + segundo.getModelo() + ": pierden tiempo");
-        }
+        primero.retirar();
+        segundo.retirar();
+        notificarEvento("ACCIDENTE", "Colision entre " + primero.getModelo()
+                + " y " + segundo.getModelo() + ": ambos abandonan la carrera");
     }
 
     private void cambiarClimaAleatorio() {

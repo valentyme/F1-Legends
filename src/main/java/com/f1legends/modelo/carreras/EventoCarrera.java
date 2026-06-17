@@ -37,4 +37,7 @@ public class EventoCarrera {
     public String toString() {
         return "[" + tipoEvento + "] Vuelta " + vuelta + ": " + descripcion;
     }
+
+    public String getTipo() { return tipoEvento;
+    }
 }

@@ -1,6 +1,7 @@
 package com.f1legends.modelo.auto;
 
 import com.f1legends.modelo.Escuderias.Escuderia;
+import com.f1legends.modelo.TipoRueda;
 import com.f1legends.patrones.factory.TipoAuto;
 
 public class Auto {
@@ -13,7 +14,11 @@ public class Auto {
     private int vueltasCompletadas;
     private boolean fueraCarrera;
     private double tiempoDetenido;
+    private double duracionDetencion;
+    private boolean enBoxes;
     private double desgasteNeumaticos;
+    private TipoRueda tipoRuedaActual;
+    private int paradasBoxes;
 
     private final double factorAleatorio;
     private double variacionMomento;
@@ -45,12 +50,16 @@ public class Auto {
         }
         if (tiempoDetenido > 0) {
             tiempoDetenido = Math.max(0, tiempoDetenido - deltaTiempo);
+            if (tiempoDetenido == 0) {
+                enBoxes = false;
+                duracionDetencion = 0;
+            }
             return;
         }
 
         actualizarVariacionMomento();
 
-        double velocidadReal = velocidadBase * factorAleatorio * variacionMomento * factorEstrategia;
+        double velocidadReal = velocidadBase * factorAleatorio * variacionMomento * factorEstrategia * getFactorRueda();
         progreso += velocidadReal * deltaTiempo;
 
         while (progreso >= 1.0) {
@@ -77,10 +86,14 @@ public class Auto {
     public double getFactorAleatorio() { return factorAleatorio; }
     public boolean isFueraCarrera() { return fueraCarrera; }
     public double getTiempoDetenido() { return tiempoDetenido; }
+    public double getDuracionDetencion() { return duracionDetencion; }
+    public boolean isEnBoxes() { return enBoxes; }
     public double getDesgasteNeumaticos() { return desgasteNeumaticos; }
+    public TipoRueda getTipoRuedaActual() { return tipoRuedaActual; }
+    public int getParadasBoxes() { return paradasBoxes; }
 
     public double getVelocidadEfectiva() {
-        return velocidadBase * factorAleatorio * variacionMomento * factorEstrategia;
+        return velocidadBase * factorAleatorio * variacionMomento * factorEstrategia * getFactorRueda();
     }
 
     public double getFactorEstrategia() { return factorEstrategia; }
@@ -91,23 +104,47 @@ public class Auto {
     public void setEscuderia(Escuderia escuderia) { this.escuderia = escuderia; }
     public void setTipoAuto(TipoAuto tipoAuto) { this.tipoAuto = tipoAuto; }
     public void setProgreso(double progreso) { this.progreso = progreso; }
+    public void setTipoRuedaActual(TipoRueda tipoRuedaActual) { this.tipoRuedaActual = tipoRuedaActual; }
 
     public void detener(double segundos) {
         if (!fueraCarrera) {
             tiempoDetenido = Math.max(tiempoDetenido, segundos);
+            duracionDetencion = Math.max(duracionDetencion, segundos);
+            enBoxes = false;
+        }
+    }
+
+    public void entrarABoxes(double segundos) {
+        if (!fueraCarrera) {
+            tiempoDetenido = Math.max(tiempoDetenido, segundos);
+            duracionDetencion = Math.max(duracionDetencion, segundos);
+            enBoxes = true;
+            paradasBoxes++;
         }
     }
 
     public void retirar() {
         fueraCarrera = true;
         tiempoDetenido = 0;
+        duracionDetencion = 0;
+        enBoxes = false;
+    }
+
+    // Si el auto está detenido por alguna razón (accidente, etc.)
+    public boolean estaDetenido() {
+        return tiempoDetenido > 0;  // el nombre exacto del campo depende de tu implementación
     }
 
     public void aumentarDesgaste(double cantidad) {
-        desgasteNeumaticos = Math.min(100, desgasteNeumaticos + cantidad);
+        double durabilidad = tipoRuedaActual == null ? 65.0 : Math.max(1, tipoRuedaActual.getDurabilidad());
+        desgasteNeumaticos = Math.min(100, desgasteNeumaticos + cantidad * (65.0 / durabilidad));
     }
 
     public void reducirDesgaste(double cantidad) {
         desgasteNeumaticos = Math.max(0, desgasteNeumaticos - cantidad);
+    }
+
+    private double getFactorRueda() {
+        return tipoRuedaActual == null ? 1.0 : tipoRuedaActual.getRendimiento();
     }
 }

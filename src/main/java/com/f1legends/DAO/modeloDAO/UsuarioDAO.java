@@ -37,7 +37,7 @@ public class UsuarioDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Error al crear usuario: " + e.getMessage(), e);
         }
-        if (rol == "Jugador"){
+        if ("Jugador".equals(rol)){
             int id = obtenerIdPorUsername(username);
             RankingGlobalDAO.EntradaRanking aux = new RankingGlobalDAO.EntradaRanking(id, username, 0 );
             RankingGlobalDAO hola = new RankingGlobalDAO();
