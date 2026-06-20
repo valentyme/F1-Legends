@@ -157,24 +157,6 @@ public class CircuitoSilverstone extends Circuito {
         gc.fillText("52 vueltas · 5.891 km", 64, 90);
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  TRAZADO — forma de Silverstone según imagen de referencia
-    //
-    //  Puntos clave del layout (en canvas 950x650):
-    //
-    //  Recta de meta / pit straight: horizontal superior derecha ~(580,170)→(750,170)
-    //  Curva Copse:         esquina superior derecha, radio amplio
-    //  Maggotts/Becketts:   chicane izquierda-derecha centro-derecha
-    //  Chapel:              curva rápida bajando
-    //  Hangar Straight:     recta bajando al costado derecho
-    //  Stowe:               curva amplia inferior derecha
-    //  Vale/Club:           chicane inferior
-    //  Abbey:               curva amplia inferior izquierda
-    //  Farm/Village:        curva izquierda subiendo
-    //  Loop:                curva cerrada pequeña izquierda
-    //  Aintree/Wellington:  sección superior izquierda
-    //  Luffield:            curva cerrada vuelta al inicio
-    // ════════════════════════════════════════════════════════════════════
     private void trazarCircuito(GraphicsContext gc) {
         gc.beginPath();
 

@@ -71,7 +71,7 @@ public class Main extends Application {
         if (circuitos.isEmpty()) {
             throw new IllegalStateException("No hay circuitos cargados en la base de datos.");
         }
-        CircuitoDTO circuitoDto = circuitos.get(0);
+        CircuitoDTO circuitoDto = circuitos.get(3);
         facade.seleccionarCircuito(circuitoDto.getId());
 
         int vueltas = Math.min(3, Math.max(1, circuitoDto.getVueltas()));
