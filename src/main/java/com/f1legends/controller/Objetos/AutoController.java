@@ -1,4 +1,4 @@
-package com.f1legends.controller;
+package com.f1legends.controller.Objetos;
 
 import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
 import com.f1legends.modelo.auto.Auto;

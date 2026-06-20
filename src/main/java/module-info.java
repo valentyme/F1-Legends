@@ -23,4 +23,12 @@ module com.f1legends {
 
     opens com.f1legends.vista to javafx.fxml;
     opens com.f1legends.controller to javafx.fxml;
+    exports com.f1legends.controller.Usuario;
+    opens com.f1legends.controller.Usuario to javafx.fxml;
+    exports com.f1legends.controller.Usuario.Admin;
+    opens com.f1legends.controller.Usuario.Admin to javafx.fxml;
+    exports com.f1legends.controller.Usuario.Jugador;
+    opens com.f1legends.controller.Usuario.Jugador to javafx.fxml;
+    exports com.f1legends.controller.Objetos;
+    opens com.f1legends.controller.Objetos to javafx.fxml;
 }

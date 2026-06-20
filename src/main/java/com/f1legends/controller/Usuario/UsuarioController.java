@@ -1,4 +1,4 @@
-package com.f1legends.controller;
+package com.f1legends.controller.Usuario;
 
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;

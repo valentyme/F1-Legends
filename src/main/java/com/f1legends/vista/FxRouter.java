@@ -1,6 +1,6 @@
 package com.f1legends.vista;
 
-import com.f1legends.controller.Sesion;
+import com.f1legends.controller.Usuario.Sesion;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

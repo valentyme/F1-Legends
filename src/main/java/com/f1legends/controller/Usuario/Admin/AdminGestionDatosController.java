@@ -1,7 +1,10 @@
-package com.f1legends.controller;
+package com.f1legends.controller.Usuario.Admin;
 
 import com.f1legends.DAO.modeloDAO.AutoDAO;
 import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
+import com.f1legends.controller.Objetos.AutoController;
+import com.f1legends.controller.Objetos.EscuderiaController;
+import com.f1legends.controller.Objetos.PilotoController;
 import com.f1legends.modelo.Escuderias.Escuderia;
 import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.auto.Auto;

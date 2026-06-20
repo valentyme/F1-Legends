@@ -1,5 +1,6 @@
-package com.f1legends.controller;
+package com.f1legends.controller.Usuario.Jugador;
 
+import com.f1legends.controller.Usuario.Sesion;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.vista.FxRouter;
 import javafx.fxml.FXML;

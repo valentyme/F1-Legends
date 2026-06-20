@@ -1,6 +1,6 @@
 package com.f1legends.vista;
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
-import com.f1legends.controller.RankingController;
+import com.f1legends.controller.Objetos.RankingController;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.auto.Auto;
