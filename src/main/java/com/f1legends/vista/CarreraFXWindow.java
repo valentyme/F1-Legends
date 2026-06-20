@@ -5,6 +5,7 @@ import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
+import com.f1legends.patrones.observer.EstadisticaObserver;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -48,6 +49,9 @@ public class CarreraFXWindow {
     private final List<EventoVisual> eventosVisuales = new ArrayList<>();
     private final Object lockEventos = new Object();
     private boolean resultadosMostrados;
+
+    // Observer que acumula estadísticas de la carrera (vueltas, boxes, accidentes, adelantamientos)
+    private final EstadisticaObserver estadisticaObserver = new EstadisticaObserver();
 
     public CarreraFXWindow(Carrera carrera) {
         this(carrera, null, List.of(), new RankingController(new RankingGlobalDAO()));
@@ -119,7 +123,7 @@ public class CarreraFXWindow {
         -fx-font-size: 10px;
         """;
 
-    // ── Labels ────────────────────────────────────
+        // ── Labels ────────────────────────────────────
         Label tituloEstado  = new Label("ESTADO");
         Label lblEstado     = new Label("Inicio");
         Label tituloClima   = new Label("CLIMA");
@@ -225,6 +229,9 @@ public class CarreraFXWindow {
             // Evento visual en canvas
             crearEventoVisual(evento.getTipo(), evento.getDescripcion(), c);
         });
+
+        // ── Observer: acumula estadísticas para mostrar al final de la carrera ──
+        carrera.agregarObservador(estadisticaObserver);
 
         // ── Layout ────────────────────────────────────
         BorderPane root = new BorderPane();
@@ -505,6 +512,12 @@ public class CarreraFXWindow {
                 + " | +" + puntosGanados + " pts | Total: " + puntosTotales + " pts");
         resumen.setStyle("-fx-text-fill: #ef1d26; -fx-font-size: 16px; -fx-font-weight: 800;");
 
+        Label stats = new Label("Adelantamientos: " + estadisticaObserver.getAdelantamientos()
+                + "   |   Boxes: " + estadisticaObserver.getBoxes()
+                + "   |   Accidentes: " + estadisticaObserver.getAccidentes()
+                + "   |   Cambios de estado: " + estadisticaObserver.getCambiosEstado());
+        stats.setStyle("-fx-text-fill: #aaaaaa; -fx-font-size: 11px;");
+
         VBox podio = new VBox(8);
         podio.getChildren().add(crearLineaPodio("PODIO", ""));
         for (int i = 0; i < Math.min(3, posiciones.size()); i++) {
@@ -524,7 +537,7 @@ public class CarreraFXWindow {
         cerrar.setStyle("-fx-background-color: #ef1d26; -fx-text-fill: white; -fx-font-weight: 800; -fx-padding: 10 18;");
         cerrar.setOnAction(e -> resultados.close());
 
-        root.getChildren().addAll(titulo, resumen, podio, tabla, cerrar);
+        root.getChildren().addAll(titulo, resumen, stats, podio, tabla, cerrar);
         resultados.setScene(new Scene(root, 520, 520));
         resultados.show();
     }
