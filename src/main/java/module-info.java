@@ -32,7 +32,7 @@ module com.f1legends {
     exports com.f1legends.controller.Objetos;
     opens com.f1legends.controller.Objetos to javafx.fxml;
     exports com.f1legends.modelo.Piloto;
-    exports com.f1legends.patrones.FactoryMethod;
+    exports com.f1legends.patrones.UsuarioFactory;
     exports com.f1legends.vista.Terminal;
     opens com.f1legends.vista.Terminal to javafx.fxml;
 }

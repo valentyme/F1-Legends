@@ -1,0 +1,10 @@
+IMPORTANTE:
+
+A la hora de crear una Base de datos se debe de seleccionar SQLite
+
+Seguido, cuandoe este dentro de la pantalla para asignarle un nombre
+se le debe de asiganar: f1_legends.db   Para su correcto funcionamiento.
+
+Luego correr los comando de CreacionTablas.sql de a pasos y por ultimo
+correr Bdd-Datos.sql  para la carga correcta.
+

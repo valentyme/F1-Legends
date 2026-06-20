@@ -1,4 +1,4 @@
-package com.f1legends.patrones.FactoryMethod;
+package com.f1legends.patrones.UsuarioFactory;
 
 //import f1.modelo.Administrador;
 //import f1.modelo.Jugador;
