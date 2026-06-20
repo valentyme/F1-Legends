@@ -3,7 +3,7 @@ package com.f1legends.servicios;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.circuitos.Circuito;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.f1legends.controller;
 
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;

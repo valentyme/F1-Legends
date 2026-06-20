@@ -1,6 +1,6 @@
 package com.f1legends.patrones.estrategias;
 
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 
 // Estrategia agresiva: mayor riesgo, mayor velocidad
 public class EstrategiaAgresiva implements EstrategiaConduccion {

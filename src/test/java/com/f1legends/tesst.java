@@ -2,7 +2,7 @@ package com.f1legends;
 
 import com.f1legends.DAO.ConexionBD;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 
 public class tesst {
     public static void main(String[] args) {

@@ -1,7 +1,7 @@
 package com.f1legends.DAO.modeloDAO;
 
 import com.f1legends.DAO.ConexionBD;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

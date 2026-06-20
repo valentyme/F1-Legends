@@ -1,17 +1,18 @@
-package com.f1legends.vista;
+package com.f1legends.vista.Terminal;
 
 import com.f1legends.DAO.modeloDAO.CircuitoDTO;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.controller.PreparadorGrilla;
 import com.f1legends.controller.Objetos.RankingController;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.modelo.carreras.Carrera;
 import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
+import com.f1legends.vista.CarreraFXWindow;
 import javafx.application.Application;
 import javafx.stage.Stage;
 

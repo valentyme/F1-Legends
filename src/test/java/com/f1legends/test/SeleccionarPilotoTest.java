@@ -2,7 +2,7 @@ package com.f1legends.test;
 
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

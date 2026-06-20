@@ -8,7 +8,7 @@ import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
 import com.f1legends.DAO.modeloDAO.UsuarioDAO;
 import com.f1legends.controller.Objetos.RankingController;
 import com.f1legends.controller.Usuario.Sesion;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import com.f1legends.modelo.Usuarios.Jugador;
 import com.f1legends.modelo.Usuarios.Participante;
 import com.f1legends.modelo.auto.Auto;

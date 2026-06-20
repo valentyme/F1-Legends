@@ -4,7 +4,7 @@ import com.f1legends.DAO.modeloDAO.AutoDAO;
 import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.modelo.Escuderias.Escuderia;
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import com.f1legends.modelo.auto.Auto;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
 

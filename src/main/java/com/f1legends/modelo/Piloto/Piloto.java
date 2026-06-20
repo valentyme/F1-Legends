@@ -1,4 +1,4 @@
-package com.f1legends.modelo;
+package com.f1legends.modelo.Piloto;
 
 import com.f1legends.patrones.estrategias.EstrategiaConduccion;
 

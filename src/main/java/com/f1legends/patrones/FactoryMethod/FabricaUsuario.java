@@ -1,8 +1,12 @@
-package com.f1legends.modelo.Usuarios;
+package com.f1legends.patrones.FactoryMethod;
 
 //import f1.modelo.Administrador;
 //import f1.modelo.Jugador;
 //import f1.modelo.Usuario;
+
+import com.f1legends.modelo.Usuarios.Administrador;
+import com.f1legends.modelo.Usuarios.Jugador;
+import com.f1legends.modelo.Usuarios.Usuario;
 
 /**
  * Fábrica que instancia el tipo de usuario correcto según el rol.

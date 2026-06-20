@@ -1,6 +1,6 @@
 package com.f1legends.servicios;
 
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import com.f1legends.DAO.modeloDAO.PilotoDAO;
 
 import java.util.ArrayList;

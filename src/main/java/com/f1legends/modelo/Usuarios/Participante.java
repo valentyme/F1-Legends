@@ -1,6 +1,6 @@
 package com.f1legends.modelo.Usuarios;
 
-import com.f1legends.modelo.Piloto;
+import com.f1legends.modelo.Piloto.Piloto;
 import com.f1legends.modelo.auto.Auto;
 
 public class Participante {
