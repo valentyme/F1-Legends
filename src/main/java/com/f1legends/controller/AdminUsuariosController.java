@@ -19,8 +19,7 @@ import java.util.List;
 public class AdminUsuariosController {
     private final UsuarioController usuarioController = new UsuarioController(
             new UsuarioDAO(),
-            new RankingGlobalDAO(),
-            null
+            new RankingGlobalDAO()
     );
 
     @FXML private TableView<UsuarioRow> usuariosTable;

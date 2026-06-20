@@ -9,27 +9,60 @@ INSERT INTO Escuderias (nombre, color) VALUES
                                            ('Kick Sauber', '#2F4F4F'),
                                            ('RB (Visa CashApp)', '#191970'),
                                            ('Haas', '#FFFFFF');
-CREATE TABLE IF NOT EXISTS Autos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    modelo TEXT NOT NULL,
-    velocidad_base REAL NOT NULL,
-    escuderia_id INTEGER NOT NULL,
-    tipo_auto TEXT NOT NULL CHECK (tipo_auto IN ('REGLAMENTO_2022', 'REGLAMENTO_2023', 'REGLAMENTO_2024')),
-    FOREIGN KEY (escuderia_id) REFERENCES Escuderias(id),
-    UNIQUE (escuderia_id, tipo_auto)
-);
 
 INSERT INTO Autos (modelo, velocidad_base, escuderia_id, tipo_auto) VALUES
-                                                                        ('SF-24', 0.055, 1, 'REGLAMENTO_2024'),
-                                                                        ('W15', 0.051, 2, 'REGLAMENTO_2024'),
-                                                                        ('RB20', 0.058, 3, 'REGLAMENTO_2024'),
-                                                                        ('MCL38', 0.052, 4, 'REGLAMENTO_2024'),
-                                                                        ('A524', 0.050, 5, 'REGLAMENTO_2024'),
-                                                                        ('AMR24', 0.053, 6, 'REGLAMENTO_2024'),
-                                                                        ('FW46', 0.049, 7, 'REGLAMENTO_2024'),
-                                                                        ('C44', 0.048, 8, 'REGLAMENTO_2024'),
-                                                                        ('VCARB 01', 0.050, 9, 'REGLAMENTO_2024'),
-                                                                        ('VF-24', 0.047, 10, 'REGLAMENTO_2024');
+-- Ferrari
+('F1-75', 0.052, 1, 'REGLAMENTO_2022'),
+('SF-23', 0.053, 1, 'REGLAMENTO_2023'),
+('SF-24', 0.055, 1, 'REGLAMENTO_2024'),
+
+-- Mercedes
+('W13', 0.047, 2, 'REGLAMENTO_2022'),
+('W14', 0.049, 2, 'REGLAMENTO_2023'),
+('W15', 0.051, 2, 'REGLAMENTO_2024'),
+
+-- Red Bull
+('RB18', 0.057, 3, 'REGLAMENTO_2022'),
+('RB19', 0.060, 3, 'REGLAMENTO_2023'),
+('RB20', 0.058, 3, 'REGLAMENTO_2024'),
+
+-- McLaren
+('MCL36', 0.046, 4, 'REGLAMENTO_2022'),
+('MCL60', 0.051, 4, 'REGLAMENTO_2023'),
+('MCL38', 0.052, 4, 'REGLAMENTO_2024'),
+
+-- Alpine
+('A522', 0.046, 5, 'REGLAMENTO_2022'),
+('A523', 0.048, 5, 'REGLAMENTO_2023'),
+('A524', 0.050, 5, 'REGLAMENTO_2024'),
+
+-- Aston Martin
+('AMR22', 0.045, 6, 'REGLAMENTO_2022'),
+('AMR23', 0.052, 6, 'REGLAMENTO_2023'),
+('AMR24', 0.053, 6, 'REGLAMENTO_2024'),
+
+-- Williams
+('FW44', 0.044, 7, 'REGLAMENTO_2022'),
+('FW45', 0.047, 7, 'REGLAMENTO_2023'),
+('FW46', 0.049, 7, 'REGLAMENTO_2024'),
+
+-- Kick Sauber
+('C42', 0.044, 8, 'REGLAMENTO_2022'),
+('C43', 0.046, 8, 'REGLAMENTO_2023'),
+('C44', 0.048, 8, 'REGLAMENTO_2024'),
+
+-- RB (Visa CashApp)
+('AT03', 0.045, 9, 'REGLAMENTO_2022'),
+('AT04', 0.047, 9, 'REGLAMENTO_2023'),
+('VCARB 01', 0.050, 9, 'REGLAMENTO_2024'),
+
+-- Haas
+('VF-22', 0.043, 10, 'REGLAMENTO_2022'),
+('VF-23', 0.046, 10, 'REGLAMENTO_2023'),
+('VF-24', 0.047, 10, 'REGLAMENTO_2024');
+
+
+
 INSERT INTO Pilotos (nombre, escuderia_id, auto_id, habilidad) VALUES
                                                                    ('Charles Leclerc', 1, 1, 92),
                                                                    ('Carlos Sainz', 1, 1, 91),
@@ -51,12 +84,6 @@ INSERT INTO Pilotos (nombre, escuderia_id, auto_id, habilidad) VALUES
                                                                    ('Daniel Ricciardo', 9, 9, 88),
                                                                    ('Kevin Magnussen', 10, 10, 82),
                                                                    ('Nico Hülkenberg', 10, 10, 86);
-CREATE TABLE IF NOT EXISTS Circuitos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre TEXT NOT NULL,
-    pais TEXT NOT NULL,
-    vueltas INTEGER NOT NULL
-);
 
 INSERT INTO Circuitos (nombre, pais, vueltas) VALUES
                                                   ('Monza', 'Italia', 53),
@@ -70,4 +97,3 @@ INSERT INTO Circuitos (nombre, pais, vueltas) VALUES
                                                   ('Yas Marina', 'Emiratos Árabes Unidos', 58),
                                                   ('Bahrain International Circuit', 'Baréin', 57);
 
-INSERT INTO Usuarios (username, password, rol, fecha_registro) VALUES ('Martin','1234','Jugador', '12')

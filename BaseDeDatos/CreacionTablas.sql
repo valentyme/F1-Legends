@@ -132,3 +132,5 @@ create table RankingGlobal
         references Usuarios,
     puntaje INTEGER not null
 );
+
+SELECT * FROM Autos;

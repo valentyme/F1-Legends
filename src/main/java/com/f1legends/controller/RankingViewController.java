@@ -16,8 +16,7 @@ import java.util.List;
 public class RankingViewController {
     private final UsuarioController usuarioController = new UsuarioController(
             new UsuarioDAO(),
-            new RankingGlobalDAO(),
-            null
+            new RankingGlobalDAO()
     );
 
     @FXML private TableView<RankingRow> rankingTable;

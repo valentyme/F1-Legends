@@ -25,15 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * Ventana JavaFX que visualiza cualquier Carrera ya configurada.
- * Se puede abrir desde el flujo de consola (MainFX) o desde una
- * pantalla de configuración JavaFX en el futuro.
- *
- * Uso:
- *   CarreraFXWindow ventana = new CarreraFXWindow(carrera, jugador, facade);
- *   ventana.mostrarYEsperar(ownerStage); // bloquea hasta que la carrera termine
- */
 public class CarreraFXWindow {
 
     private static final int ANCHO_CANVAS = 950;

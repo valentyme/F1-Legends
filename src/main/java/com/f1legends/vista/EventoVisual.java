@@ -1,8 +1,6 @@
 package com.f1legends.vista;
 
-/**
- * Evento visual temporal que se dibuja sobre el canvas durante unos segundos.
- */
+
 public class EventoVisual {
     public enum Tipo { ACCIDENTE, BOXES, ADELANTAMIENTO, CLIMA, FINALIZACION }
 

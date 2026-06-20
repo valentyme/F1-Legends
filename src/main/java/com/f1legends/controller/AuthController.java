@@ -16,8 +16,7 @@ import java.util.Optional;
 public class AuthController {
     private final UsuarioController usuarioController = new UsuarioController(
             new UsuarioDAO(),
-            new RankingGlobalDAO(),
-            null
+            new RankingGlobalDAO()
     );
 
     @FXML private TextField loginUsuarioField;

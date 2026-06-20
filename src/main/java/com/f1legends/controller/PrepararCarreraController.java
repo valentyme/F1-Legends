@@ -39,12 +39,7 @@ public class PrepararCarreraController {
     private final AutoDAO autoDAO = new AutoDAO();
     private final CircuitoDAO circuitoDAO = new CircuitoDAO();
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-    private final CarreraController carreraController = new CarreraController(
-            usuarioDAO,
-            circuitoDAO,
-            new RankingController(new RankingGlobalDAO()),
-            null
-    );
+    private final PreparadorGrilla preparadorGrilla = new PreparadorGrilla();
 
     @FXML private ComboBox<Piloto> pilotoCombo;
     @FXML private ComboBox<TipoAuto> reglamentacionCombo;
@@ -102,7 +97,7 @@ public class PrepararCarreraController {
             facade.configurarCarrera(vueltasSpinner.getValue(), climaCombo.getValue());
 
             Carrera carrera = facade.iniciarCarrera();
-            if (!carreraController.prepararAutosParticipantes(carrera, facade)) {
+            if (!preparadorGrilla.prepararAutosParticipantes(carrera, facade)) {
                 mostrarError("No se pudo preparar la grilla de la carrera.");
                 return;
             }

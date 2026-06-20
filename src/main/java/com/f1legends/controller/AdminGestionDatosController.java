@@ -32,9 +32,9 @@ public class AdminGestionDatosController {
     private final AutoDAO autoDAO = new AutoDAO();
     private final EscuderiaDAO escuderiaDAO = new EscuderiaDAO();
     private final SistemaCarreraFacade facade = new SistemaCarreraFacade();
-    private final PilotoController pilotoController = new PilotoController(facade, autoDAO, null);
-    private final EscuderiaController escuderiaController = new EscuderiaController(facade, escuderiaDAO, null);
-    private final AutoController autoController = new AutoController(new AutoService(), escuderiaDAO, null);
+    private final PilotoController pilotoController = new PilotoController(facade, autoDAO);
+    private final EscuderiaController escuderiaController = new EscuderiaController(facade, escuderiaDAO);
+    private final AutoController autoController = new AutoController(new AutoService(), escuderiaDAO);
     private static final String AUTO_REFERENCIADO = "No se puede eliminar el auto porque hay pilotos asociados. "
             + "Primero modificá o eliminá esos pilotos.";
 

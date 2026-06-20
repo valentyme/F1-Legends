@@ -16,8 +16,7 @@ import java.io.IOException;
 public class PerfilJugadorController {
     private final UsuarioController usuarioController = new UsuarioController(
             new UsuarioDAO(),
-            new RankingGlobalDAO(),
-            null
+            new RankingGlobalDAO()
     );
 
     @FXML private Label usuarioActualLabel;

@@ -42,8 +42,8 @@ import java.util.Set;
 
 /**
  * Vista de preparación de carrera para el modo Multijugador Local.
- * Replica el flujo de CarreraController#flujoMultijugador pero con
- * controles JavaFX en lugar de prompts de consola:
+ * Equivalente JavaFX al antiguo flujo de consola (CarreraController#flujoMultijugador),
+ * ya eliminado:
  *   - El jugador principal (sesión actual) elige piloto y auto.
  *   - Se pueden agregar jugadores adicionales ya registrados en la BD,
  *     cada uno con su propio piloto y auto (sin repetir jugador ni piloto).
@@ -57,13 +57,8 @@ public class PrepararMultijugadorController {
     private final AutoDAO autoDAO = new AutoDAO();
     private final CircuitoDAO circuitoDAO = new CircuitoDAO();
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-    private final UsuarioController usuarioController = new UsuarioController(usuarioDAO, new RankingGlobalDAO(), null);
-    private final CarreraController carreraController = new CarreraController(
-            usuarioDAO,
-            circuitoDAO,
-            new RankingController(new RankingGlobalDAO()),
-            null
-    );
+    private final UsuarioController usuarioController = new UsuarioController(usuarioDAO, new RankingGlobalDAO());
+    private final PreparadorGrilla preparadorGrilla = new PreparadorGrilla();
 
     @FXML private ComboBox<Piloto> pilotoPrincipalCombo;
     @FXML private ComboBox<TipoAuto> reglamentacionCombo;
@@ -196,7 +191,7 @@ public class PrepararMultijugadorController {
             facade.configurarCarrera(vueltasSpinner.getValue(), climaCombo.getValue());
 
             Carrera carrera = facade.iniciarCarrera();
-            if (!carreraController.prepararAutosParticipantes(carrera, facade)) {
+            if (!preparadorGrilla.prepararAutosParticipantes(carrera, facade)) {
                 mostrarError("No se pudo preparar la grilla de la carrera.");
                 return;
             }

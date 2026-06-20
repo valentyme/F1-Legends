@@ -1,140 +1,164 @@
 package com.f1legends.vista;
 
-import com.f1legends.DAO.modeloDAO.AutoDAO;
-import com.f1legends.DAO.modeloDAO.CircuitoDAO;
-import com.f1legends.DAO.modeloDAO.EscuderiaDAO;
+import com.f1legends.DAO.modeloDAO.CircuitoDTO;
+import com.f1legends.DAO.modeloDAO.PilotoDAO;
 import com.f1legends.DAO.modeloDAO.RankingGlobalDAO;
-import com.f1legends.DAO.modeloDAO.UsuarioDAO;
-import com.f1legends.controller.AutoController;
-import com.f1legends.controller.CarreraController;
-import com.f1legends.controller.EscuderiaController;
-import com.f1legends.controller.PilotoController;
+import com.f1legends.controller.PreparadorGrilla;
 import com.f1legends.controller.RankingController;
-import com.f1legends.controller.Sesion;
-import com.f1legends.controller.UsuarioController;
+import com.f1legends.modelo.Piloto;
 import com.f1legends.modelo.Usuarios.Jugador;
-import com.f1legends.modelo.Usuarios.Usuario;
+import com.f1legends.modelo.Usuarios.Participante;
+import com.f1legends.modelo.auto.Auto;
+import com.f1legends.modelo.carreras.Carrera;
+import com.f1legends.patrones.estrategias.EstrategiaEquilibrada;
 import com.f1legends.patrones.facade.SistemaCarreraFacade;
-import com.f1legends.servicios.AutoService;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static com.f1legends.vista.ConsoleUI.*;
+public class Main extends Application {
 
-/**
- * Punto de entrada de la aplicación (consola).
- * Solo orquesta el flujo de menús y delega la lógica de cada
- * caso de uso a los controllers correspondientes, que son
- * los que se reutilizarán al migrar a JavaFX.
- */
-public class Main {
+    private final PreparadorGrilla preparadorGrilla = new PreparadorGrilla();
 
-    // ── DAOs ──────────────────────────────────────
-    private static final UsuarioDAO       usuarioDAO  = new UsuarioDAO();
-    private static final RankingGlobalDAO rankingDAO  = new RankingGlobalDAO();
-    private static final CircuitoDAO      circuitoDAO = new CircuitoDAO();
-    private static final AutoDAO          autoDAO     = new AutoDAO();
-    private static final EscuderiaDAO     escuderiaDAO = new EscuderiaDAO();
+    @Override
+    public void start(Stage stage) {
 
-    private static final Scanner sc = new Scanner(System.in);
+        SistemaCarreraFacade facade = new SistemaCarreraFacade();
 
-    // ── Controllers ───────────────────────────────
-    private static final UsuarioController   usuarioController   = new UsuarioController(usuarioDAO, rankingDAO, sc);
-    private static final RankingController   rankingController   = new RankingController(rankingDAO);
-    private static final CarreraController   carreraController   = new CarreraController(usuarioDAO, circuitoDAO, rankingController, sc);
 
-    // ════════════════════════════════════════════════
-    // MAIN
-    // ════════════════════════════════════════════════
-    public static void main(String[] args) {
-        cabecera();
-        boolean corriendo = true;
-        while (corriendo) {
-            if (!Sesion.hayUsuarioLogueado()) {
-                corriendo = menuPrincipal();
-            } else if (Sesion.esJugador()) {
-                menuJugador();
-            } else if (Sesion.esAdministrador()) {
-                menuAdministrador();
+        Jugador jugador = new Jugador(1, "valentyme", "1234", "19/06/2026");
+        facade.getConfiguracionCarrera().setJugadorPrincipal(jugador);
+        facade.seleccionarModoJuego("Singleplayer");
+
+
+        List<Piloto> pilotos = PilotoDAO.obtenerTodos();
+        if (pilotos.isEmpty()) {
+            throw new IllegalStateException("No hay pilotos cargados en la base de datos.");
+        }
+        Piloto pilotoJugador = pilotos.get(0);
+
+        facade.seleccionarPiloto(pilotoJugador.getId());
+        facade.seleccionarEstrategiaConduccion(new EstrategiaEquilibrada());
+
+        var autoDAO = new com.f1legends.DAO.modeloDAO.AutoDAO();
+        Auto autoJugador = autoDAO.obtenerTodosPorEscuderiaId(pilotoJugador.getEscuderiaId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+        if (autoJugador == null) {
+            throw new IllegalStateException(
+                    "El piloto " + pilotoJugador.getNombre() + " no tiene autos cargados en su escudería.");
+        }
+
+        List<Participante> participantes = new ArrayList<>();
+        participantes.add(new Participante(jugador, pilotoJugador, copiarAutoParaCarrera(
+                autoJugador, jugador.getId(), pilotoJugador.getNombre())));
+        facade.getConfiguracionCarrera().setParticipantes(participantes);
+
+
+        if (!completarGrillaConAutosDisponibles(facade, autoJugador, 5)) {
+            throw new IllegalStateException(
+                    "No hay suficientes pilotos con auto cargado en la base para completar la grilla.");
+        }
+
+
+        List<CircuitoDTO> circuitos = new com.f1legends.DAO.modeloDAO.CircuitoDAO().obtenerTodos();
+        if (circuitos.isEmpty()) {
+            throw new IllegalStateException("No hay circuitos cargados en la base de datos.");
+        }
+        CircuitoDTO circuitoDto = circuitos.get(0);
+        facade.seleccionarCircuito(circuitoDto.getId());
+
+        int vueltas = Math.min(3, Math.max(1, circuitoDto.getVueltas()));
+        facade.configurarCarrera(vueltas, "Soleado");
+
+        Carrera carrera = facade.iniciarCarrera();
+        if (!preparadorGrilla.prepararAutosParticipantes(carrera, facade)) {
+            throw new IllegalStateException("No se pudo preparar la grilla de la carrera.");
+        }
+        carrera.iniciar();
+
+
+        RankingController rankingController = new RankingController(new RankingGlobalDAO());
+        CarreraFXWindow ventana = new CarreraFXWindow(
+                carrera,
+                jugador,
+                facade.getConfiguracionCarrera().getParticipantes(),
+                rankingController
+        );
+        ventana.mostrar(stage);
+    }
+
+
+    private Auto copiarAutoParaCarrera(Auto auto, int idCarrera, String pilotoNombre) {
+        return new Auto(
+                idCarrera,
+                pilotoNombre + " / " + auto.getModelo(),
+                velocidadParaSimulacion(auto.getVelocidadBase()),
+                auto.getEscuderia(),
+                auto.getTipoAuto()
+        );
+    }
+
+    private double velocidadParaSimulacion(double velocidadBase) {
+        return velocidadBase > 1.0 ? velocidadBase / 5000.0 : velocidadBase;
+    }
+
+    private boolean completarGrillaConAutosDisponibles(SistemaCarreraFacade facade, Auto autoJugador,
+                                                       int minimoParticipantes) {
+        List<Participante> participantes = facade.getConfiguracionCarrera().getParticipantes();
+        if (participantes == null || minimoParticipantes < 2) {
+            return false;
+        }
+
+        Set<Integer> pilotosUsados = new HashSet<>();
+        for (Participante participante : participantes) {
+            pilotosUsados.add(participante.getPiloto().getId());
+        }
+
+        var autoDAO = new com.f1legends.DAO.modeloDAO.AutoDAO();
+
+        List<Piloto> pilotosCpu = PilotoDAO.obtenerTodos().stream()
+                .filter(piloto -> !pilotosUsados.contains(piloto.getId()))
+                .filter(piloto -> !autoDAO.obtenerTodosPorEscuderiaId(piloto.getEscuderiaId()).isEmpty())
+                .sorted(Comparator.comparingInt(Piloto::getHabilidad).reversed())
+                .toList();
+
+        if (pilotosCpu.size() + participantes.size() < minimoParticipantes) {
+            return false;
+        }
+
+        int cpuId = -1;
+        for (Piloto pilotoCpu : pilotosCpu) {
+            if (participantes.size() >= minimoParticipantes) {
+                break;
             }
+            Auto autoCpu = autoDAO.obtenerTodosPorEscuderiaId(pilotoCpu.getEscuderiaId())
+                    .stream()
+                    .filter(a -> a.getId() != autoJugador.getId())
+                    .findFirst()
+                    .orElse(null);
+            if (autoCpu == null) {
+                continue;
+            }
+            Jugador jugadorCpu = new Jugador(cpuId, "CPU - " + pilotoCpu.getNombre(), "", "CPU");
+            participantes.add(new Participante(
+                    jugadorCpu,
+                    pilotoCpu,
+                    copiarAutoParaCarrera(autoCpu, cpuId, pilotoCpu.getNombre())
+            ));
+            cpuId--;
         }
-        linea();
-        System.out.println("  Gracias por jugar F1 Legends. ¡Hasta la próxima carrera!");
-        linea();
+
+        return participantes.size() >= minimoParticipantes;
     }
 
-    // ════════════════════════════════════════════════
-    // MENÚ PRINCIPAL (sin sesión)
-    // ════════════════════════════════════════════════
-    private static boolean menuPrincipal() {
-        linea();
-        titulo("  F1 LEGENDS — MENÚ PRINCIPAL");
-        linea();
-        System.out.println("  [1] Iniciar sesión          (CU01)");
-        System.out.println("  [2] Crear perfil             (CU02)");
-        System.out.println("  [0] Salir");
-        linea();
-        System.out.print("  Opción: ");
-        String op = sc.nextLine().trim();
-        return switch (op) {
-            case "1"  -> { usuarioController.cuIniciarSesion();  yield true; }
-            case "2"  -> { usuarioController.cuCrearPerfil();    yield true; }
-            case "0"  -> false;
-            default   -> { msgError("Opción inválida."); yield true; }
-        };
-    }
-
-    // ════════════════════════════════════════════════
-    // MENÚ JUGADOR
-    // ════════════════════════════════════════════════
-    private static void menuJugador() {
-        Jugador j = Sesion.getJugadorActual();
-        linea();
-        titulo("  F1 LEGENDS — JUGADOR: " + j.getUsername().toUpperCase());
-        linea();
-        System.out.println("  [1] Jugar carrera");
-        System.out.println("  [2] Ver ranking global       (CU03)");
-        System.out.println("  [3] Modificar mi perfil      (CU05)");
-        System.out.println("  [4] Eliminar mi cuenta       (CU06)");
-        System.out.println("  [0] Cerrar sesión            (CU07)");
-        linea();
-        System.out.print("  Opción: ");
-        switch (sc.nextLine().trim()) {
-            case "1"  -> carreraController.flujoJugarCarrera(j);
-            case "2"  -> usuarioController.cuVerRanking();
-            case "3"  -> usuarioController.cuModificarPerfil();
-            case "4"  -> usuarioController.cuEliminarPerfil(false);
-            case "0"  -> usuarioController.cuCerrarSesion();
-            default   -> msgError("Opción inválida.");
-        }
-    }
-
-    // ════════════════════════════════════════════════
-    // MENÚ ADMINISTRADOR
-    // ════════════════════════════════════════════════
-    private static void menuAdministrador() {
-        Usuario sesionActual = Sesion.getUsuarioActual();
-        linea();
-        titulo("  F1 LEGENDS — ADMINISTRADOR: " + sesionActual.getUsername().toUpperCase());
-        linea();
-        System.out.println("  [1] Ver ranking global       (CU03)");
-        System.out.println("  [2] Eliminar perfil de usuario (CU06)");
-        System.out.println("  [3] Listar todos los usuarios");
-        System.out.println("  [4] Gestionar pilotos        (CU21)");
-        System.out.println("  [5] Gestionar escuderías (CU22)");
-        System.out.println("  [6] Gestionar autos          (Factory Auto)");
-        System.out.println("  [0] Cerrar sesión            (CU07)");
-        linea();
-        System.out.print("  Opción: ");
-        switch (sc.nextLine().trim()) {
-            case "1"  -> usuarioController.cuVerRanking();
-            case "2"  -> usuarioController.cuEliminarPerfil(true);
-            case "3"  -> usuarioController.listarUsuarios();
-            case "4"  -> new PilotoController(new SistemaCarreraFacade(), autoDAO, sc).cuGestionarPilotos();
-            case "5"  -> new EscuderiaController(new SistemaCarreraFacade(), escuderiaDAO, sc).cuGestionarEscuderias();
-            case "6"  -> new AutoController(new AutoService(), escuderiaDAO, sc).cuGestionarAutos();
-            case "0"  -> usuarioController.cuCerrarSesion();
-            default   -> msgError("Opción inválida.");
-        }
+    public static void main(String[] args) {
+        launch(args);
     }
 }

@@ -2,13 +2,6 @@ package com.f1legends.modelo.Usuarios;
 
 import java.util.ArrayList;
 
-/**
- * Representa un usuario con rol Jugador.
- *
- * Patrón: Factory Method (producto concreto)
- * SOLID: OCP — extiende Usuario sin modificarlo.
- * GRASP: Low Coupling — no conoce persistencia.
- */
 public class Jugador extends Usuario {
 
     public Jugador(int id, String username, String password, String fechaRegistro) {
